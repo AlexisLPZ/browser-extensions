@@ -30,6 +30,7 @@ export default [
       sourceType: "script",
       globals: {
         ...globals.browser,
+        ...globals.node, // Add Node.js globals like 'module'
         chrome: "readonly", // for extensions
       },
     },
