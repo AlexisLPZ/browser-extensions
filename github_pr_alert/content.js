@@ -1,12 +1,15 @@
-// content.js
-(function () {
-  // Only trigger on the main PR page (e.g., /owner/repo/pull/123)
-  const isMainPRPage = () => {
-    const path = location.pathname;
-    // Matches: /owner/repo/pull/123 (no extra segments)
-    return /^\/[\w.-]+\/[\w.-]+\/pull\/\d+$/.test(path);
-  };
+// Only trigger on the main PR page (e.g., /owner/repo/pull/123)
+const isMainPRPage = (path = location.pathname) => {
+  // Matches: /owner/repo/pull/123 (no extra segments)
+  return /^\/[\w.-]+\/[\w.-]+\/pull\/\d+$/.test(path);
+};
 
+// Export for testing (only in test environment)
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { isMainPRPage };
+}
+
+(function () {
   const maybeAlert = () => {
     if (isMainPRPage()) {
       alert("You are on the main page of a GitHub Pull Request.");
