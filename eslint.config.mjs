@@ -34,7 +34,26 @@ export default [
       },
     },
     rules: {
-      // Put custom rules here if needed
+      // Naming conventions
+      camelcase: ["error", { properties: "never" }],
+
+      // Code quality
+      "no-unused-vars": "error",
+      "no-undef": "error",
+      "no-console": "warn", // Allow console.log for debugging extensions
+      "no-debugger": "error",
+      "no-alert": "warn", // You're using alert() - consider disabling
+
+      // Best practices
+      eqeqeq: ["error", "always"], // Use === instead of ==
+      "no-var": "error", // Use let/const instead of var
+      "prefer-const": "error", // Use const when variable isn't reassigned
+      "no-duplicate-imports": "error",
+
+      // Security
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error",
     },
   },
   // Disable rules that conflict with Prettier
