@@ -5,13 +5,13 @@ import globals from "globals";
 import prettier from "eslint-config-prettier";
 
 export default [
-  // 1) Ignore non-source files (including the config itself)
+  // Ignore non-source files (including the config itself)
   {
     ignores: ["eslint.config.*", "node_modules/**", "dist/**", "build/**"],
   },
-  // 2) Base recommended rules
+  // Base recommended rules
   js.configs.recommended,
-  // 3) Project files config
+  // Project files config
   {
     files: ["**/*.js"],
     languageOptions: {
@@ -54,6 +54,32 @@ export default [
       "no-eval": "error",
       "no-implied-eval": "error",
       "no-new-func": "error",
+    },
+  },
+  // Test files config
+  {
+    files: ["**/*.test.js", "**/*.spec.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module", // ESM for test files
+      globals: {
+        ...globals.browser,
+        ...globals.jest, // Jest globals like describe, test, expect
+        chrome: "readonly",
+      },
+    },
+    rules: {
+      // Naming conventions
+      camelcase: ["error", { properties: "never" }],
+
+      // Code quality
+      "no-unused-vars": "warn",
+      "no-undef": "warn",
+
+      // Best practices
+      eqeqeq: ["error", "always"],
+      "no-var": "error",
+      "prefer-const": "error",
     },
   },
   // Disable rules that conflict with Prettier
