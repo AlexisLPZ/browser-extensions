@@ -1,0 +1,10 @@
+{
+  // @recommended VS Code extensions
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "bierner.markdown-mermaid",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "github.vscode-github-actions"
+  ]
+}

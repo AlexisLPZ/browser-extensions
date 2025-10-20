@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "GitHub PR Main Page Alert",
+    "version": "1.0.0",
+    "description": "Shows an alert when loading the main page of a GitHub pull request.",
+    "content_scripts": [
+        {
+            "matches": [
+                "https://github.com/*/*/pull/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
+}
