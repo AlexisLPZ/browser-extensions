@@ -1,0 +1,42 @@
+{
+  "name": "browser-extensions",
+  "version": "1.0.0",
+  "description": "Browser extensions",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "fmt": "prettier . --write",
+    "fmt:check": "prettier . --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexisLPZ/browser-extensions.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexisLPZ/browser-extensions/issues"
+  },
+  "homepage": "https://github.com/AlexisLPZ/browser-extensions#readme",
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/*.test.js"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@jest/globals": "^30.2.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.4.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "jsdom": "^27.0.1",
+    "prettier": "^3.6.2"
+  }
+}
