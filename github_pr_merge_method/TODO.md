@@ -54,7 +54,6 @@ Transform the dummy alert extension into a practical tool that automatically sel
 ### Phase 2: Options Page Development
 
 - [ ] Create form to add new rules (repo input, branch dropdown, merge method dropdown)
-- [ ] Implement rule validation (repo format, required fields)
 - [ ] Create rules list display with edit/delete functionality
 - [ ] Add rule management (add, edit, delete, reorder)
 - [ ] Implement data persistence to localStorage
