@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Merge Method Settings</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>GitHub Merge Rules</h1>
+        <p>Configure automatic merge method selection for your repositories</p>
+      </header>
+
+      <div class="add-rule-section">
+        <h2>Add New Rule</h2>
+        <form id="addRuleForm" class="rule-form">
+          <div class="form-group">
+            <label for="repoInput">Repository</label>
+            <input
+              type="text"
+              id="repoInput"
+              placeholder="e.g., OrganizationName/awesome-repo"
+              required
+            />
+            <small>Format: owner/repository-name</small>
+          </div>
+
+          <div class="form-group">
+            <label for="branchInput">Branch</label>
+            <input
+              type="text"
+              id="branchInput"
+              placeholder="e.g., develop, main, production"
+              required
+            />
+            <small>Target branch name (use * for any branch)</small>
+          </div>
+
+          <div class="form-group">
+            <label for="mergeMethodSelect">Merge Method</label>
+            <select id="mergeMethodSelect" required>
+              <option value="">Select merge method</option>
+              <option value="squash">Squash and merge</option>
+              <option value="merge">Create a merge commit</option>
+              <option value="rebase">Rebase and merge</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Add Rule</button>
+        </form>
+      </div>
+
+      <div class="rules-section">
+        <h2>Current Rules</h2>
+        <div id="rulesList" class="rules-list">
+          <div class="no-rules" id="noRulesMessage">
+            <p>No rules configured yet. Add your first rule above!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          id="clearAllBtn"
+          class="btn btn-secondary"
+          style="display: none"
+        >
+          Clear All Rules
+        </button>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
