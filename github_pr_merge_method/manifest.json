@@ -3,6 +3,11 @@
   "name": "GitHub PR Merge Method",
   "version": "1.0.0",
   "description": "Set the merge method to your default method when loading the main page of a GitHub pull request.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "GitHub Merge Method Settings"
+  },
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": ["https://github.com/*/*/pull/*"],
