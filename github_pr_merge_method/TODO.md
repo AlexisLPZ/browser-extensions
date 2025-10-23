@@ -13,16 +13,6 @@ Transform the dummy alert extension into a practical tool that automatically sel
 
 ## Technical Architecture Decisions
 
-### UI Choice: **Options Page** ✅
-
-**Decision**: Use Options Page instead of Popup
-**Rationale**:
-
-- Need to manage multiple rules (repo + branch + merge method combinations)
-- Requires form with add/edit/delete functionality
-- Better UX for complex configuration
-- More space for help text and rule management
-
 ### Storage: **localStorage** ✅
 
 **Decision**: Use localStorage instead of chrome.storage API
@@ -59,9 +49,6 @@ Transform the dummy alert extension into a practical tool that automatically sel
 
 ### Phase 1: Foundation Setup
 
-- [ ] Update `manifest.json` to include options page
-- [ ] Add `options.html` and `options.js` files
-- [ ] Create basic HTML structure for rule management
 - [ ] Implement localStorage helper functions (save/load/delete rules)
 
 ### Phase 2: Options Page Development
