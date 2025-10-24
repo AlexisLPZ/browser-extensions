@@ -29,6 +29,10 @@ const MERGE_METHODS = {
  * Default schema version
  */
 const SCHEMA_VERSION = "1.0.0";
+/**
+ * Default empty rules collection
+ */
+const DEFAULT_RULES_COLLECTION = `{"version":"${SCHEMA_VERSION}","rules":[]}`;
 
 /**
  * Validates a rule against the schema
@@ -141,6 +145,33 @@ function removeStorageData(keys = null) {
   }
 }
 
+/**
+ * Checks if a rule with the same repository and branch already exists in storage
+ * @param {string} repository - Repository in format "owner/repo"
+ * @param {string} branch - Target branch name
+ * @returns {boolean} - true if rule can be added (no conflict), false if should edit instead
+ */
+function canAddRule(repository, branch) {
+  try {
+    // Get existing rules from storage
+    const existingRules = JSON.parse(
+      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
+    );
+
+    // Check if a rule with the same repository and branch already exists
+    const conflictExists = existingRules.rules.some(
+      (rule) => rule.repository === repository && rule.branch === branch
+    );
+
+    // Return true if no conflict (can add), false if conflict exists (should edit)
+    return !conflictExists;
+  } catch (error) {
+    console.error("Error checking for rule conflicts:", error);
+    // If there's an error reading storage, assume it's safe to add
+    return true;
+  }
+}
+
 // Export for CommonJS (Node.js, Jest, etc.)
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
@@ -149,6 +180,7 @@ if (typeof module !== "undefined" && module.exports) {
     generateRuleId,
     createMergeRule,
     removeStorageData,
+    canAddRule,
   };
 }
 
@@ -159,4 +191,5 @@ if (typeof window !== "undefined") {
   window.generateRuleId = generateRuleId;
   window.createMergeRule = createMergeRule;
   window.isMainPRPage = isMainPRPage;
+  window.canAddRule = canAddRule;
 }
