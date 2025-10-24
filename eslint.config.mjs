@@ -41,7 +41,7 @@ export default [
       // Code quality
       "no-unused-vars": "error",
       "no-undef": "error",
-      "no-console": "warn", // Allow console.log for debugging extensions
+      "no-console": "off", // Allow console.log for debugging extensions
       "no-debugger": "error",
       "no-alert": "warn", // You're using alert() - consider disabling
 

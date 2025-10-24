@@ -23,10 +23,17 @@
     "url": "https://github.com/AlexisLPZ/browser-extensions/issues"
   },
   "homepage": "https://github.com/AlexisLPZ/browser-extensions#readme",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
   "jest": {
-    "testEnvironment": "jsdom",
+    "testEnvironment": "node",
     "testMatch": [
       "**/*.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
     ]
   },
   "devDependencies": {
