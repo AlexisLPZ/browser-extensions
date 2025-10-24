@@ -1,6 +1,7 @@
 const { isMainPRPage } = require("./content.js");
 const { validateRule } = require("./content.js");
 const { generateRuleId } = require("./content.js");
+const { canAddRule } = require("./content.js");
 
 describe("isMainPRPage", () => {
   test("should return true for main PR page", () => {
@@ -139,5 +140,267 @@ describe("generateRuleId", () => {
 
     expect(uniqueIds.size).toBe(100);
     expect(endTime - startTime).toBeLessThan(1000); // Should complete quickly
+  });
+});
+
+describe("canAddRule", () => {
+  describe("when localStorage is empty", () => {
+    it("should return true for any repository and branch", () => {
+      localStorage.getItem.mockReturnValue(null);
+
+      const result = canAddRule("owner/repo", "main");
+
+      expect(result).toBe(true);
+      expect(localStorage.getItem).toHaveBeenCalledWith("mergeRules");
+    });
+
+    it("should use DEFAULT_RULES_COLLECTION when no data exists", () => {
+      localStorage.getItem.mockReturnValue(null);
+
+      canAddRule("owner/repo", "main");
+
+      expect(localStorage.getItem).toHaveBeenCalledWith("mergeRules");
+    });
+  });
+
+  describe("when localStorage contains rules", () => {
+    beforeEach(() => {
+      // Create rules manually to avoid validateRule calls
+      const existingRules = {
+        version: "1.0.0",
+        rules: [
+          {
+            id: "rule_1234567890_abc123def",
+            repository: "owner/repo1",
+            branch: "main",
+            mergeMethod: "squash",
+            createdAt: "2023-01-01T00:00:00.000Z",
+            updatedAt: "2023-01-01T00:00:00.000Z",
+          },
+          {
+            id: "rule_1234567891_def456ghi",
+            repository: "owner/repo2",
+            branch: "develop",
+            mergeMethod: "merge",
+            createdAt: "2023-01-01T00:00:00.000Z",
+            updatedAt: "2023-01-01T00:00:00.000Z",
+          },
+          {
+            id: "rule_1234567892_ghi789jkl",
+            repository: "owner/repo1",
+            branch: "develop",
+            mergeMethod: "rebase",
+            createdAt: "2023-01-01T00:00:00.000Z",
+            updatedAt: "2023-01-01T00:00:00.000Z",
+          },
+        ],
+      };
+
+      localStorage.getItem.mockReturnValue(JSON.stringify(existingRules));
+    });
+
+    it("should return false when exact repository and branch match exists", () => {
+      const result = canAddRule("owner/repo1", "main");
+
+      expect(result).toBe(false);
+    });
+
+    it("should return false when exact repository and branch match exists (different case)", () => {
+      const result = canAddRule("owner/repo2", "develop");
+
+      expect(result).toBe(false);
+    });
+
+    it("should return true when repository matches but branch is different", () => {
+      const result = canAddRule("owner/repo1", "feature-branch");
+
+      expect(result).toBe(true);
+    });
+
+    it("should return true when branch matches but repository is different", () => {
+      const result = canAddRule("owner/repo3", "main");
+
+      expect(result).toBe(true);
+    });
+
+    it("should return true when both repository and branch are different", () => {
+      const result = canAddRule("owner/repo3", "feature-branch");
+
+      expect(result).toBe(true);
+    });
+
+    it("should return true when repository is similar but not exact match", () => {
+      const result = canAddRule("owner/repo1-test", "main");
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe("when localStorage contains malformed JSON", () => {
+    it("should throw an error when JSON is invalid", () => {
+      localStorage.getItem.mockReturnValue("invalid json");
+
+      expect(() => {
+        canAddRule("owner/repo", "main");
+      }).toThrow();
+    });
+
+    it("should throw an error when JSON structure is wrong", () => {
+      localStorage.getItem.mockReturnValue('{"invalid": "structure"}');
+
+      expect(() => {
+        canAddRule("owner/repo", "main");
+      }).toThrow();
+    });
+  });
+
+  describe("when localStorage.getItem throws an error", () => {
+    it("should propagate the error", () => {
+      localStorage.getItem.mockImplementation(() => {
+        throw new Error("localStorage access denied");
+      });
+
+      expect(() => {
+        canAddRule("owner/repo", "main");
+      }).toThrow("localStorage access denied");
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle empty rules array", () => {
+      const emptyRules = {
+        version: "1.0.0",
+        rules: [],
+      };
+
+      localStorage.getItem.mockReturnValue(JSON.stringify(emptyRules));
+
+      const result = canAddRule("owner/repo", "main");
+
+      expect(result).toBe(true);
+    });
+
+    it("should handle rules with asterisk branches as exact matches", () => {
+      const rulesWithAsterisk = {
+        version: "1.0.0",
+        rules: [
+          {
+            id: "rule_1234567890_abc123def",
+            repository: "owner/repo",
+            branch: "*",
+            mergeMethod: "squash",
+            createdAt: "2023-01-01T00:00:00.000Z",
+            updatedAt: "2023-01-01T00:00:00.000Z",
+          },
+        ],
+      };
+
+      localStorage.getItem.mockReturnValue(JSON.stringify(rulesWithAsterisk));
+
+      // Should return false only for exact match with "*" branch
+      expect(canAddRule("owner/repo", "*")).toBe(false);
+
+      // Should return true for different branches (asterisk is treated as literal)
+      expect(canAddRule("owner/repo", "main")).toBe(true);
+    });
+
+    it("should handle special characters in repository and branch names", () => {
+      const specialCharRules = {
+        version: "1.0.0",
+        rules: [
+          {
+            id: "rule_1234567890_abc123def",
+            repository: "owner/repo-name",
+            branch: "feature/branch",
+            mergeMethod: "squash",
+            createdAt: "2023-01-01T00:00:00.000Z",
+            updatedAt: "2023-01-01T00:00:00.000Z",
+          },
+        ],
+      };
+
+      localStorage.getItem.mockReturnValue(JSON.stringify(specialCharRules));
+
+      // Should return false for exact match
+      expect(canAddRule("owner/repo-name", "feature/branch")).toBe(false);
+
+      // Should return true for different special chars
+      expect(canAddRule("owner/repo_name", "feature-branch")).toBe(true);
+    });
+
+    it("should handle case sensitivity correctly", () => {
+      const caseSensitiveRules = {
+        version: "1.0.0",
+        rules: [
+          {
+            id: "rule_1234567890_abc123def",
+            repository: "Owner/Repo",
+            branch: "Main",
+            mergeMethod: "squash",
+            createdAt: "2023-01-01T00:00:00.000Z",
+            updatedAt: "2023-01-01T00:00:00.000Z",
+          },
+        ],
+      };
+
+      localStorage.getItem.mockReturnValue(JSON.stringify(caseSensitiveRules));
+
+      // Should return false for exact case match
+      expect(canAddRule("Owner/Repo", "Main")).toBe(false);
+
+      // Should return true for different case
+      expect(canAddRule("owner/repo", "main")).toBe(true);
+    });
+  });
+
+  describe("parameter validation", () => {
+    it("should handle undefined repository parameter", () => {
+      localStorage.getItem.mockReturnValue(null);
+
+      expect(() => {
+        canAddRule(undefined, "main");
+      }).not.toThrow();
+    });
+
+    it("should handle undefined branch parameter", () => {
+      localStorage.getItem.mockReturnValue(null);
+
+      expect(() => {
+        canAddRule("owner/repo", undefined);
+      }).not.toThrow();
+    });
+
+    it("should handle null parameters", () => {
+      localStorage.getItem.mockReturnValue(null);
+
+      expect(() => {
+        canAddRule(null, null);
+      }).not.toThrow();
+    });
+  });
+
+  describe("console.error behavior", () => {
+    let consoleSpy;
+
+    beforeEach(() => {
+      consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it("should log error when JSON parsing fails", () => {
+      localStorage.getItem.mockReturnValue("invalid json");
+
+      expect(() => {
+        canAddRule("owner/repo", "main");
+      }).toThrow();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error checking for rule conflicts:",
+        expect.any(Error)
+      );
+    });
   });
 });

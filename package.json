@@ -24,9 +24,12 @@
   },
   "homepage": "https://github.com/AlexisLPZ/browser-extensions#readme",
   "jest": {
-    "testEnvironment": "jsdom",
+    "testEnvironment": "node",
     "testMatch": [
       "**/*.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
     ]
   },
   "devDependencies": {

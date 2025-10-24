@@ -12,7 +12,7 @@ const MERGE_METHODS = {
  * @typedef {Object} MergeRule
  * @property {string} id - Unique identifier for the rule (UUID format)
  * @property {string} repository - Repository in format "owner/repo"
- * @property {string} branch - Target branch name (use "*" for any branch)
+ * @property {string} branch - Target branch name
  * @property {string} mergeMethod - Merge method: "squash", "merge", or "rebase"
  * @property {string} createdAt - ISO timestamp when rule was created
  * @property {string} updatedAt - ISO timestamp when rule was last modified
@@ -37,7 +37,7 @@ const DEFAULT_RULES_COLLECTION = `{"version":"${SCHEMA_VERSION}","rules":[]}`;
 /**
  * Validates a rule against the schema
  * @param {string} repository - Repository in format "owner/repo"
- * @param {string} branch - Target branch name (use "*" for any branch)
+ * @param {string} branch - Target branch name
  * @param {string} mergeMethod - Merge method: "squash", "merge", or "rebase"
  * @returns {boolean} - Returns true if rule was added successfully, false otherwise
  */
@@ -167,8 +167,7 @@ function canAddRule(repository, branch) {
     return !conflictExists;
   } catch (error) {
     console.error("Error checking for rule conflicts:", error);
-    // If there's an error reading storage, assume it's safe to add
-    return true;
+    throw error; // Let the caller handle it
   }
 }
 
