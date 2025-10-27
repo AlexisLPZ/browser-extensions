@@ -4,9 +4,5 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
-  "eslint.validate": ["javascript"],
-  // Jest test configuration
-  "jest.jestCommandLine": "npm test --",
-  "jest.rootPath": "${workspaceFolder}",
-  "jest.runMode": "on-demand"
+  "eslint.validate": ["javascript"]
 }
