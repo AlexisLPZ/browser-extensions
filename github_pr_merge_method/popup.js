@@ -97,6 +97,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Handle delete button clicks using event delegation
+  rulesList.addEventListener("click", (e) => {
+    if (e.target.classList.contains("btn-delete")) {
+      const ruleId = e.target.dataset.ruleId;
+      if (confirm("Are you sure you want to delete this rule?")) {
+        deleteRule(ruleId);
+      }
+    }
+  });
+
   /**
    * Loads rules from storage and displays them in the UI
    */
@@ -144,6 +154,31 @@ document.addEventListener("DOMContentLoaded", () => {
     ruleDiv.innerHTML = getRuleItemTemplate(rule, escapeHtml);
 
     return ruleDiv;
+  }
+
+  /**
+   * Deletes a specific rule by ID
+   * @param {string} ruleId - The ID of the rule to delete
+   */
+
+  function deleteRule(ruleId) {
+    // Get existing rules from storage
+    const rulesCollection = JSON.parse(
+      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
+    );
+
+    // Filter out the rule to delete
+    rulesCollection.rules = rulesCollection.rules.filter(
+      (rule) => rule.id !== ruleId
+    );
+    // Save back to storage
+    localStorage.setItem("mergeRules", JSON.stringify(rulesCollection));
+
+    // Reload and display the updated rules list
+    loadAndDisplayRules();
+
+    // Show success message
+    showSuccessMessage("Rule deleted successfully!");
   }
 
   /**

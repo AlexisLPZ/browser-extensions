@@ -42,6 +42,7 @@ function getRuleItemTemplate(rule, escapeHtml) {
           <strong>Merge Method:</strong> ${mergeMethodDisplay[rule.mergeMethod]}
         </div>
       </div>
+      <button class="btn btn-delete" data-rule-id="${escapeHtml(rule.id)}">Delete</button>
     `;
 }
 
