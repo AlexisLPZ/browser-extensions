@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const addRuleForm = document.getElementById("addRuleForm");
   const rulesList = document.getElementById("rulesList");
   const clearAllBtn = document.getElementById("clearAllBtn");
+  const exportRulesBtn = document.getElementById("exportRulesBtn");
 
   // Initialize the popup by loading and displaying existing rules
   loadAndDisplayRules();
@@ -97,6 +98,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Handle "Export Rules" button click
+  exportRulesBtn.addEventListener("click", () => {
+    exportRules();
+  });
+
   // Handle delete button clicks using event delegation
   rulesList.addEventListener("click", (e) => {
     if (e.target.classList.contains("btn-delete")) {
@@ -121,11 +127,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Clear the rules list
     rulesList.innerHTML = "";
 
-    // Show/hide the "Clear All" button based on whether rules exist
+    // Show/hide the "Clear All" and "Export" buttons based on whether rules exist
     if (rules.length === 0) {
       clearAllBtn.style.display = "none";
+      exportRulesBtn.style.display = "none";
     } else {
       clearAllBtn.style.display = "block";
+      exportRulesBtn.style.display = "block";
     }
 
     // If no rules, show the "no rules" message
@@ -179,6 +187,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Show success message
     showSuccessMessage("Rule deleted successfully!");
+  }
+
+  /**
+   * Exports rules as a JSON file
+   */
+  function exportRules() {
+    // Get rules from storage
+    const rulesCollection = JSON.parse(
+      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
+    );
+
+    // Create a blob with the JSON data
+    const jsonString = JSON.stringify(rulesCollection, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    // Generate filename with current date
+    const timestamp = new Date().toISOString().split("T")[0];
+    link.download = `github-merge-rules-${timestamp}.json`;
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Show success message
+    showSuccessMessage("Rules exported successfully!");
   }
 
   /**
