@@ -180,6 +180,8 @@ if (typeof module !== "undefined" && module.exports) {
     createMergeRule,
     removeStorageData,
     canAddRule,
+    DEFAULT_RULES_COLLECTION,
+    SCHEMA_VERSION,
   };
 }
 
@@ -191,4 +193,6 @@ if (typeof window !== "undefined") {
   window.createMergeRule = createMergeRule;
   window.isMainPRPage = isMainPRPage;
   window.canAddRule = canAddRule;
+  window.DEFAULT_RULES_COLLECTION = DEFAULT_RULES_COLLECTION;
+  window.SCHEMA_VERSION = SCHEMA_VERSION;
 }
