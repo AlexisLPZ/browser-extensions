@@ -1,0 +1,42 @@
+---
+alwaysApply: true
+globs: */test.js
+description: Testing conventions and patterns
+---
+
+# Testing Conventions
+
+## Test Structure
+
+Mirror each file:
+
+```
+package/
+├── content.js/         # Content script specific logic
+├── content.test.js/    # Tests
+├── popup.js/           # Display logic
+├── popup.test.js/      # Tests
+└── ...                 # etc.
+```
+
+## Test Organization
+
+- **Unit tests**: Test individual functions/classes in isolation
+- **Integration tests**: Test component interactions
+- **End-to-end tests**: Test complete workflows
+
+## Testing Tools
+
+- **jest**: Primary testing framework
+
+## Running Tests
+
+```bash
+# All tests
+npm test
+```
+
+## Mocking Guidelines
+
+- Mock external dependencies (APIs, databases, file systems)
+- Mock ML model predictions for consistent testing
