@@ -2,6 +2,7 @@ const { isMainPRPage } = require("./content.js");
 const { validateRule } = require("./content.js");
 const { generateRuleId } = require("./content.js");
 const { canAddRule } = require("./content.js");
+const { createMergeRule } = require("./content.js");
 
 describe("isMainPRPage", () => {
   test("should return true for main PR page", () => {
@@ -140,6 +141,37 @@ describe("generateRuleId", () => {
 
     expect(uniqueIds.size).toBe(100);
     expect(endTime - startTime).toBeLessThan(1000); // Should complete quickly
+  });
+});
+
+describe("createMergeRule", () => {
+  test("should create a merge rule with correct structure", () => {
+    const rule = createMergeRule("owner/repo", "main", "squash");
+
+    expect(rule).toHaveProperty("id");
+    expect(rule).toHaveProperty("repository");
+    expect(rule).toHaveProperty("branch");
+    expect(rule).toHaveProperty("mergeMethod");
+    expect(rule).toHaveProperty("createdAt");
+    expect(rule).toHaveProperty("updatedAt");
+  });
+
+  test("should return correct data for squash merge into main", () => {
+    const rule = createMergeRule("owner/repo", "main", "squash");
+
+    expect(rule.id).toMatch(/^rule_\d+_[a-z0-9]{9}$/);
+    expect(rule.repository).toBe("owner/repo");
+    expect(rule.branch).toBe("main");
+    expect(rule.mergeMethod).toBe("squash");
+  });
+
+  test("should return correct data for merge merge into develop", () => {
+    const rule = createMergeRule("organization/repo", "develop", "merge");
+
+    expect(rule.id).toMatch(/^rule_\d+_[a-z0-9]{9}$/);
+    expect(rule.repository).toBe("organization/repo");
+    expect(rule.branch).toBe("develop");
+    expect(rule.mergeMethod).toBe("merge");
   });
 });
 
