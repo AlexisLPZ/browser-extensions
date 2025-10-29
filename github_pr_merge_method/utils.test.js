@@ -1,8 +1,8 @@
-const { isMainPRPage } = require("./content.js");
-const { validateRule } = require("./content.js");
-const { generateRuleId } = require("./content.js");
-const { canAddRule } = require("./content.js");
-const { createMergeRule } = require("./content.js");
+const { isMainPRPage } = require("./utils.js");
+const { validateRule } = require("./utils.js");
+const { generateRuleId } = require("./utils.js");
+const { canAddRule } = require("./utils.js");
+const { createMergeRule } = require("./utils.js");
 
 describe("isMainPRPage", () => {
   test("should return true for main PR page", () => {
