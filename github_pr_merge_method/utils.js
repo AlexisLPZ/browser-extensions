@@ -134,11 +134,11 @@ function canAddRule(repository, branch) {
 // Export for CommonJS (Node.js, Jest, etc.)
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
+    MERGE_METHODS,
     validateRule,
     isMainPRPage,
     generateRuleId,
     createMergeRule,
-
     canAddRule,
     DEFAULT_RULES_COLLECTION,
     SCHEMA_VERSION,
@@ -147,6 +147,7 @@ if (typeof module !== "undefined" && module.exports) {
 
 // Export for ES6 modules (modern browsers, bundlers)
 if (typeof window !== "undefined") {
+  window.MERGE_METHODS = MERGE_METHODS;
   window.validateRule = validateRule;
   window.generateRuleId = generateRuleId;
   window.createMergeRule = createMergeRule;
