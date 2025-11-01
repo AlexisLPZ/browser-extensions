@@ -7,15 +7,6 @@ if (typeof module !== "undefined" && typeof window === "undefined") {
   const constants = require("./constants.js");
   MERGE_METHODS = constants.MERGE_METHODS;
   DEFAULT_RULES_COLLECTION = constants.DEFAULT_RULES_COLLECTION;
-} else if (typeof window !== "undefined") {
-  // Browser environment - use globals set by constants.js loaded in HTML
-  MERGE_METHODS = window.MERGE_METHODS || {
-    SQUASH: "squash",
-    MERGE: "merge",
-    REBASE: "rebase",
-  };
-  DEFAULT_RULES_COLLECTION =
-    window.DEFAULT_RULES_COLLECTION || '{"version":"1.0.0","rules":[]}';
 }
 
 /**

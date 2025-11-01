@@ -112,6 +112,7 @@ if (typeof window !== "undefined") {
   window.getRuleItemTemplate = getRuleItemTemplate;
   window.getToastStyles = getToastStyles;
   window.getToastInlineStyles = getToastInlineStyles;
+  window.escapeHtml = escapeHtml;
 }
 
 // Export for CommonJS (testing)
