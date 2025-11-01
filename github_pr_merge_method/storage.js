@@ -6,15 +6,10 @@
  *
  * Cross-browser compatible: works with both chrome.* and browser.* APIs
  */
-/* global browser DEFAULT_RULES_COLLECTION */
+/* global browser, DEFAULT_RULES_COLLECTION, STORAGE_KEY */
 
 // Get the appropriate API namespace (chrome for Chrome/Edge, browser for Firefox)
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
-
-/**
- * Storage key for merge rules
- */
-const STORAGE_KEY = "mergeRules";
 
 /**
  * Gets merge rules from chrome.storage.local
@@ -88,6 +83,5 @@ if (typeof module !== "undefined" && module.exports) {
     getRules,
     setRules,
     clearRules,
-    STORAGE_KEY,
   };
 }

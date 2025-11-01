@@ -1,13 +1,4 @@
-/* global getRules */
-
-/**
- * Valid merge methods
- */
-const MERGE_METHODS = {
-  SQUASH: "squash",
-  MERGE: "merge",
-  REBASE: "rebase",
-};
+/* global getRules, MERGE_METHODS, DEFAULT_RULES_COLLECTION */
 
 /**
  * Schema for a single merge rule
@@ -26,15 +17,6 @@ const MERGE_METHODS = {
  * @property {string} version - Schema version (for future compatibility)
  * @property {MergeRule[]} rules - Array of merge rules
  */
-
-/**
- * Default schema version
- */
-const SCHEMA_VERSION = "1.0.0";
-/**
- * Default empty rules collection
- */
-const DEFAULT_RULES_COLLECTION = `{"version":"${SCHEMA_VERSION}","rules":[]}`;
 
 /**
  * Validates a rule against the schema
@@ -153,7 +135,6 @@ if (typeof module !== "undefined" && module.exports) {
     createMergeRule,
     canAddRule,
     DEFAULT_RULES_COLLECTION,
-    SCHEMA_VERSION,
   };
 }
 
@@ -166,5 +147,4 @@ if (typeof window !== "undefined") {
   window.isMainPRPage = isMainPRPage;
   window.canAddRule = canAddRule;
   window.DEFAULT_RULES_COLLECTION = DEFAULT_RULES_COLLECTION;
-  window.SCHEMA_VERSION = SCHEMA_VERSION;
 }

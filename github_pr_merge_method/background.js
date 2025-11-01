@@ -4,20 +4,10 @@
  *
  * Cross-browser compatible: works with both chrome.* and browser.* APIs
  */
-/* global browser */
+/* global browser, DEFAULT_RULES_COLLECTION */
 
 // Get the appropriate API namespace (chrome for Chrome/Edge, browser for Firefox)
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
-
-/**
- * Schema version
- */
-const SCHEMA_VERSION = "1.0.0";
-
-/**
- * Default empty rules collection
- */
-const DEFAULT_RULES_COLLECTION = `{"version":"${SCHEMA_VERSION}","rules":[]}`;
 
 /**
  * Gets merge rules from chrome.storage.local
