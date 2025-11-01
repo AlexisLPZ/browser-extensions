@@ -7,36 +7,10 @@
  *
  * Cross-browser compatible: works with both chrome.* and browser.* APIs
  */
-/* global isMainPRPage, browser */
+/* global isMainPRPage, browser, extractRepoFromPath */
 
 // Get the appropriate API namespace (chrome for Chrome/Edge, browser for Firefox)
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
-
-/**
- * Extracts the repository (owner/repo) from a GitHub URL path
- * @param {string} path - URL pathname (e.g., "/owner/repo/pull/123")
- * @returns {string|null} - Repository in format "owner/repo" or null if not found
- */
-function extractRepoFromPath(path = location.pathname) {
-  const match = path.match(/^\/([^/]+)\/([^/]+)\//);
-  if (match) {
-    return `${match[1]}/${match[2]}`;
-  }
-  return null;
-}
-
-/**
- * Extracts the PR number from a GitHub URL path
- * @param {string} path - URL pathname (e.g., "/owner/repo/pull/123")
- * @returns {string|null} - PR number or null if not found
- */
-function extractPRNumberFromPath(path = location.pathname) {
-  const match = path.match(/\/pull\/(\d+)/);
-  if (match) {
-    return match[1];
-  }
-  return null;
-}
 
 /**
  * Gets the target branch name from the PR page DOM
@@ -800,8 +774,6 @@ if (document.readyState === "loading") {
 // Export functions for testing
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
-    extractRepoFromPath,
-    extractPRNumberFromPath,
     getBranchFromPRPage,
     findMatchingRule,
     getMergeButton,
