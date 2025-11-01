@@ -1,16 +1,15 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "GitHub PR Merge Method",
   "version": "1.0.0",
   "description": "Set the merge method to your default method when loading the main page of a GitHub pull request.",
-  "browser_action": {
+  "action": {
     "default_popup": "popup.html",
     "default_title": "GitHub Merge Method Settings"
   },
   "permissions": ["storage"],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {

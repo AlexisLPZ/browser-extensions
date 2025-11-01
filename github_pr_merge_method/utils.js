@@ -109,14 +109,24 @@ const isMainPRPage = (path = location.pathname) => {
  * Checks if a rule with the same repository and branch already exists in storage
  * @param {string} repository - Repository in format "owner/repo"
  * @param {string} branch - Target branch name
- * @returns {boolean} - true if rule can be added (no conflict), false if should edit instead
+ * @returns {Promise<boolean>} - true if rule can be added (no conflict), false if should edit instead
  */
-function canAddRule(repository, branch) {
+async function canAddRule(repository, branch) {
   try {
     // Get existing rules from storage
-    const existingRules = JSON.parse(
-      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
-    );
+    // Note: In browser context, getRules is provided by storage.js
+    // In test context, we fall back to localStorage
+    let existingRules;
+    if (typeof getRules !== "undefined") {
+      existingRules = await getRules();
+    } else if (typeof localStorage !== "undefined") {
+      // Fallback for test environment
+      existingRules = JSON.parse(
+        localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
+      );
+    } else {
+      throw new Error("No storage mechanism available");
+    }
 
     // Check if a rule with the same repository and branch already exists
     const conflictExists = existingRules.rules.some(
