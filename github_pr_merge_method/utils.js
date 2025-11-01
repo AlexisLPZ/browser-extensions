@@ -1,3 +1,5 @@
+/* global getRules */
+
 /**
  * Valid merge methods
  */

@@ -6,6 +6,7 @@
  *
  * Cross-browser compatible: works with both chrome.* and browser.* APIs
  */
+/* global browser DEFAULT_RULES_COLLECTION */
 
 // Get the appropriate API namespace (chrome for Chrome/Edge, browser for Firefox)
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
