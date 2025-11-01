@@ -15,6 +15,17 @@ function getNoRulesTemplate() {
 }
 
 /**
+ * Escapes HTML to prevent XSS
+ * @param {string} text - Text to escape
+ * @returns {string} - Escaped text
+ */
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text; // Browser auto-escapes when using textContent
+  return div.innerHTML; // Returns the escaped version
+}
+
+/**
  * Template for a single rule item
  * @param {Object} rule - The rule object
  * @param {string} rule.repository - Repository name
@@ -107,6 +118,7 @@ if (typeof window !== "undefined") {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     getNoRulesTemplate,
+    escapeHtml,
     getRuleItemTemplate,
     getToastStyles,
     getToastInlineStyles,

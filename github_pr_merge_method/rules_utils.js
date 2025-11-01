@@ -1,4 +1,22 @@
-/* global getRules, MERGE_METHODS, DEFAULT_RULES_COLLECTION */
+/* global getRules */
+
+// Import constants for Node.js/test environment
+let MERGE_METHODS, DEFAULT_RULES_COLLECTION;
+if (typeof module !== "undefined" && typeof window === "undefined") {
+  // Node.js/Jest environment - import from constants.js
+  const constants = require("./constants.js");
+  MERGE_METHODS = constants.MERGE_METHODS;
+  DEFAULT_RULES_COLLECTION = constants.DEFAULT_RULES_COLLECTION;
+} else if (typeof window !== "undefined") {
+  // Browser environment - use globals set by constants.js loaded in HTML
+  MERGE_METHODS = window.MERGE_METHODS || {
+    SQUASH: "squash",
+    MERGE: "merge",
+    REBASE: "rebase",
+  };
+  DEFAULT_RULES_COLLECTION =
+    window.DEFAULT_RULES_COLLECTION || '{"version":"1.0.0","rules":[]}';
+}
 
 /**
  * Schema for a single merge rule

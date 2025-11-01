@@ -9,18 +9,7 @@
  * in order in popup.html. The eslint-disable-next-line comment below
  * tells ESLint about these expected globals to avoid false "no-undef" errors.
  */
-/* global validateRule, canAddRule, createMergeRule, DEFAULT_RULES_COLLECTION, getNoRulesTemplate, getRuleItemTemplate, getToastInlineStyles, getToastStyles, getRules, setRules */
-
-/**
- * Escapes HTML to prevent XSS
- * @param {string} text - Text to escape
- * @returns {string} - Escaped text
- */
-function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.textContent = text; // Browser auto-escapes when using textContent
-  return div.innerHTML; // Returns the escaped version
-}
+/* global validateRule, canAddRule, createMergeRule, DEFAULT_RULES_COLLECTION, getNoRulesTemplate, getRuleItemTemplate, getToastInlineStyles, getToastStyles, getRules, setRules, escapeHtml */
 
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
@@ -244,11 +233,4 @@ if (typeof window !== "undefined" && typeof getToastStyles === "function") {
   const style = document.createElement("style");
   style.textContent = getToastStyles();
   document.head.appendChild(style);
-}
-
-// Export for CommonJS (Node.js, Jest, etc.)
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = {
-    escapeHtml,
-  };
 }
