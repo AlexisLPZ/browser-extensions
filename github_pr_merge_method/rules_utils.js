@@ -83,12 +83,6 @@ function createMergeRule(repository, branch, mergeMethod) {
   };
 }
 
-// Only trigger on the main PR page (e.g., /owner/repo/pull/123)
-const isMainPRPage = (path = location.pathname) => {
-  // Matches: /owner/repo/pull/123 (no extra segments)
-  return /^\/[\w.-]+\/[\w.-]+\/pull\/\d+$/.test(path);
-};
-
 /**
  * Checks if a rule with the same repository and branch already exists in storage
  * @param {string} repository - Repository in format "owner/repo"
@@ -128,23 +122,17 @@ async function canAddRule(repository, branch) {
 // Export for CommonJS (Node.js, Jest, etc.)
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
-    MERGE_METHODS,
     validateRule,
-    isMainPRPage,
     generateRuleId,
     createMergeRule,
     canAddRule,
-    DEFAULT_RULES_COLLECTION,
   };
 }
 
 // Export for ES6 modules (modern browsers, bundlers)
 if (typeof window !== "undefined") {
-  window.MERGE_METHODS = MERGE_METHODS;
   window.validateRule = validateRule;
   window.generateRuleId = generateRuleId;
   window.createMergeRule = createMergeRule;
-  window.isMainPRPage = isMainPRPage;
   window.canAddRule = canAddRule;
-  window.DEFAULT_RULES_COLLECTION = DEFAULT_RULES_COLLECTION;
 }

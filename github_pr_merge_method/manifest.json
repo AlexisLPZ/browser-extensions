@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["https://github.com/*/*/pull/*"],
-      "js": ["utils.js", "content.js"],
+      "js": ["rules_utils.js", "github_utils.js", "content.js"],
       "run_at": "document_idle"
     }
   ]
