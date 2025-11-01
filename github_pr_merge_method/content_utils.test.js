@@ -1,4 +1,4 @@
-const { isMainPRPage } = require("./github_utils.js");
+const { isMainPRPage } = require("./content_utils.js");
 
 describe("isMainPRPage", () => {
   test("should return true for main PR page", () => {
