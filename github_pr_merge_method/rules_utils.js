@@ -1,16 +1,18 @@
 /* global getRules */
 
 // Import constants for Node.js/test environment
+let MERGE_METHODS, DEFAULT_RULES_COLLECTION;
+
 if (typeof module !== "undefined" && typeof window === "undefined") {
   // Node.js/Jest environment - import from constants.js
   const constants = require("./constants.js");
-  // Re-declare for Node environment only
-  const MERGE_METHODS = constants.MERGE_METHODS;
-  const DEFAULT_RULES_COLLECTION = constants.DEFAULT_RULES_COLLECTION;
+  MERGE_METHODS = constants.MERGE_METHODS;
+  DEFAULT_RULES_COLLECTION = constants.DEFAULT_RULES_COLLECTION;
+} else if (typeof window !== "undefined") {
+  // Browser environment - reference globals from constants.js (loaded before this script)
+  MERGE_METHODS = window.MERGE_METHODS;
+  DEFAULT_RULES_COLLECTION = window.DEFAULT_RULES_COLLECTION;
 }
-
-// In browser environment, MERGE_METHODS and DEFAULT_RULES_COLLECTION
-// are already available as globals from constants.js (loaded before this script)
 
 /**
  * Schema for a single merge rule
