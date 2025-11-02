@@ -1,15 +1,38 @@
 /* global getRules */
 
-// Import constants for Node.js/test environment
+/**
+ * ENVIRONMENT-SPECIFIC CONSTANT HANDLING
+ *
+ * This file needs to work in two different JavaScript environments:
+ * 1. Browser (for the extension popup and content scripts)
+ * 2. Node.js (for running Jest tests)
+ *
+ * Each environment loads modules differently, which requires this conditional setup.
+ */
+
+// Declare variables that will hold our constants
+// Using 'let' (not 'const') because we'll assign values conditionally below
 let MERGE_METHODS, DEFAULT_RULES_COLLECTION;
 
+// ENVIRONMENT DETECTION & CONSTANT LOADING
 if (typeof module !== "undefined" && typeof window === "undefined") {
-  // Node.js/Jest environment - import from constants.js
+  // ========== NODE.JS / JEST ENVIRONMENT ==========
+  // In Node.js, 'module' exists but 'window' doesn't
+  // We use CommonJS 'require()' to import constants from constants.js
   const constants = require("./constants.js");
   MERGE_METHODS = constants.MERGE_METHODS;
   DEFAULT_RULES_COLLECTION = constants.DEFAULT_RULES_COLLECTION;
 } else if (typeof window !== "undefined") {
-  // Browser environment - reference globals from constants.js (loaded before this script)
+  // ========== BROWSER ENVIRONMENT ==========
+  // In browsers, 'window' exists and scripts load via <script> tags in popup.html
+  //
+  // WHY NOT JUST IMPORT?: In the browser, constants.js loads BEFORE this file
+  // (see popup.html script order). To avoid duplicate global variable declarations
+  // (which causes "already declared" errors), constants.js wraps its code in an
+  // IIFE (Immediately Invoked Function Expression) and only exports to window.
+  //
+  // So we reference the already-loaded window.MERGE_METHODS instead of declaring
+  // our own constants, preventing naming conflicts.
   MERGE_METHODS = window.MERGE_METHODS;
   DEFAULT_RULES_COLLECTION = window.DEFAULT_RULES_COLLECTION;
 }
