@@ -2,7 +2,9 @@
  * Popup script for GitHub PR Merge Method extension
  *
  * This file depends on globals defined in other scripts loaded before it:
- * - utils.js: Core utility functions for rule validation and management
+ * - constants.js: Shared constants
+ * - rules_utils.js: Core utility functions for rule validation and management
+ * - storage.js: Storage abstraction layer
  * - templates.js: HTML/CSS template functions for UI rendering
  *
  * These globals are available at runtime because the scripts are loaded
