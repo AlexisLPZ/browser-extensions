@@ -4,7 +4,6 @@ const isMainPRPage = (path = location.pathname) => {
   return /^\/[\w.-]+\/[\w.-]+\/pull\/\d+$/.test(path);
 };
 
-// TODO: Add test
 /**
  * Extracts the repository (owner/repo) from a GitHub URL path
  * @param {string} path - URL pathname (e.g., "/owner/repo/pull/123")
