@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-const { escapeHtml } = require("./popup.js");
+const { escapeHtml } = require("./templates.js");
 
 describe("escapeHtml", () => {
   test("should escape HTML script tags", () => {

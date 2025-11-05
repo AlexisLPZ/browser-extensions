@@ -1,11 +1,41 @@
+/* global getRules */
+
 /**
- * Valid merge methods
+ * ENVIRONMENT-SPECIFIC CONSTANT HANDLING
+ *
+ * This file needs to work in two different JavaScript environments:
+ * 1. Browser (for the extension popup and content scripts)
+ * 2. Node.js (for running Jest tests)
+ *
+ * Each environment loads modules differently, which requires this conditional setup.
  */
-const MERGE_METHODS = {
-  SQUASH: "squash",
-  MERGE: "merge",
-  REBASE: "rebase",
-};
+
+// Declare variables that will hold our constants
+// Using 'let' (not 'const') because we'll assign values conditionally below
+let MERGE_METHODS, DEFAULT_RULES_COLLECTION;
+
+// ENVIRONMENT DETECTION & CONSTANT LOADING
+if (typeof module !== "undefined" && typeof window === "undefined") {
+  // ========== NODE.JS / JEST ENVIRONMENT ==========
+  // In Node.js, 'module' exists but 'window' doesn't
+  // We use CommonJS 'require()' to import constants from constants.js
+  const constants = require("./constants.js");
+  MERGE_METHODS = constants.MERGE_METHODS;
+  DEFAULT_RULES_COLLECTION = constants.DEFAULT_RULES_COLLECTION;
+} else if (typeof window !== "undefined") {
+  // ========== BROWSER ENVIRONMENT ==========
+  // In browsers, 'window' exists and scripts load via <script> tags in popup.html
+  //
+  // WHY NOT JUST IMPORT?: In the browser, constants.js loads BEFORE this file
+  // (see popup.html script order). To avoid duplicate global variable declarations
+  // (which causes "already declared" errors), constants.js wraps its code in an
+  // IIFE (Immediately Invoked Function Expression) and only exports to window.
+  //
+  // So we reference the already-loaded window.MERGE_METHODS instead of declaring
+  // our own constants, preventing naming conflicts.
+  MERGE_METHODS = window.MERGE_METHODS;
+  DEFAULT_RULES_COLLECTION = window.DEFAULT_RULES_COLLECTION;
+}
 
 /**
  * Schema for a single merge rule
@@ -24,15 +54,6 @@ const MERGE_METHODS = {
  * @property {string} version - Schema version (for future compatibility)
  * @property {MergeRule[]} rules - Array of merge rules
  */
-
-/**
- * Default schema version
- */
-const SCHEMA_VERSION = "1.0.0";
-/**
- * Default empty rules collection
- */
-const DEFAULT_RULES_COLLECTION = `{"version":"${SCHEMA_VERSION}","rules":[]}`;
 
 /**
  * Validates a rule against the schema
@@ -99,24 +120,28 @@ function createMergeRule(repository, branch, mergeMethod) {
   };
 }
 
-// Only trigger on the main PR page (e.g., /owner/repo/pull/123)
-const isMainPRPage = (path = location.pathname) => {
-  // Matches: /owner/repo/pull/123 (no extra segments)
-  return /^\/[\w.-]+\/[\w.-]+\/pull\/\d+$/.test(path);
-};
-
 /**
  * Checks if a rule with the same repository and branch already exists in storage
  * @param {string} repository - Repository in format "owner/repo"
  * @param {string} branch - Target branch name
- * @returns {boolean} - true if rule can be added (no conflict), false if should edit instead
+ * @returns {Promise<boolean>} - true if rule can be added (no conflict), false if should edit instead
  */
-function canAddRule(repository, branch) {
+async function canAddRule(repository, branch) {
   try {
     // Get existing rules from storage
-    const existingRules = JSON.parse(
-      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
-    );
+    // Note: In browser context, getRules is provided by storage.js
+    // In test context, we fall back to localStorage
+    let existingRules;
+    if (typeof getRules !== "undefined") {
+      existingRules = await getRules();
+    } else if (typeof localStorage !== "undefined") {
+      // Fallback for test environment
+      existingRules = JSON.parse(
+        localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
+      );
+    } else {
+      throw new Error("No storage mechanism available");
+    }
 
     // Check if a rule with the same repository and branch already exists
     const conflictExists = existingRules.rules.some(
@@ -135,13 +160,9 @@ function canAddRule(repository, branch) {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     validateRule,
-    isMainPRPage,
     generateRuleId,
     createMergeRule,
-
     canAddRule,
-    DEFAULT_RULES_COLLECTION,
-    SCHEMA_VERSION,
   };
 }
 
@@ -150,8 +171,5 @@ if (typeof window !== "undefined") {
   window.validateRule = validateRule;
   window.generateRuleId = generateRuleId;
   window.createMergeRule = createMergeRule;
-  window.isMainPRPage = isMainPRPage;
   window.canAddRule = canAddRule;
-  window.DEFAULT_RULES_COLLECTION = DEFAULT_RULES_COLLECTION;
-  window.SCHEMA_VERSION = SCHEMA_VERSION;
 }

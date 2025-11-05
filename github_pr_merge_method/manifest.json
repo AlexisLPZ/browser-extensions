@@ -8,10 +8,13 @@
     "default_title": "GitHub Merge Method Settings"
   },
   "permissions": ["storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://github.com/*/*/pull/*"],
-      "js": ["utils.js", "content.js"],
+      "js": ["rules_utils.js", "content_utils.js", "content.js"],
       "run_at": "document_idle"
     }
   ]

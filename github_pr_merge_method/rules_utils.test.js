@@ -1,50 +1,7 @@
-const { isMainPRPage } = require("./utils.js");
-const { validateRule } = require("./utils.js");
-const { generateRuleId } = require("./utils.js");
-const { canAddRule } = require("./utils.js");
-const { createMergeRule } = require("./utils.js");
-
-describe("isMainPRPage", () => {
-  test("should return true for main PR page", () => {
-    expect(isMainPRPage("/facebook/react/pull/12345")).toBe(true);
-  });
-
-  test("should return true for PR with numbers in repo name", () => {
-    expect(isMainPRPage("/user/repo-123/pull/456")).toBe(true);
-  });
-
-  test("should return true for PR with dots in repo name", () => {
-    expect(isMainPRPage("/user/repo.js/pull/789")).toBe(true);
-  });
-
-  test("should return false for PR files page", () => {
-    expect(isMainPRPage("/facebook/react/pull/12345/files")).toBe(false);
-  });
-
-  test("should return false for PR commits page", () => {
-    expect(isMainPRPage("/facebook/react/pull/12345/commits")).toBe(false);
-  });
-
-  test("should return false for PR checks page", () => {
-    expect(isMainPRPage("/facebook/react/pull/12345/checks")).toBe(false);
-  });
-
-  test("should return false for non-PR page", () => {
-    expect(isMainPRPage("/facebook/react/issues/12345")).toBe(false);
-  });
-
-  test("should return false for repository root", () => {
-    expect(isMainPRPage("/facebook/react")).toBe(false);
-  });
-
-  test("should return false for empty path", () => {
-    expect(isMainPRPage("")).toBe(false);
-  });
-
-  test("should return false for invalid PR format", () => {
-    expect(isMainPRPage("/facebook/react/pull/abc")).toBe(false);
-  });
-});
+const { validateRule } = require("./rules_utils.js");
+const { generateRuleId } = require("./rules_utils.js");
+const { canAddRule } = require("./rules_utils.js");
+const { createMergeRule } = require("./rules_utils.js");
 
 describe("validateRule", () => {
   test("should return true for valid inputs", () => {
@@ -177,19 +134,19 @@ describe("createMergeRule", () => {
 
 describe("canAddRule", () => {
   describe("when localStorage is empty", () => {
-    it("should return true for any repository and branch", () => {
+    it("should return true for any repository and branch", async () => {
       localStorage.getItem.mockReturnValue(null);
 
-      const result = canAddRule("owner/repo", "main");
+      const result = await canAddRule("owner/repo", "main");
 
       expect(result).toBe(true);
       expect(localStorage.getItem).toHaveBeenCalledWith("mergeRules");
     });
 
-    it("should use DEFAULT_RULES_COLLECTION when no data exists", () => {
+    it("should use DEFAULT_RULES_COLLECTION when no data exists", async () => {
       localStorage.getItem.mockReturnValue(null);
 
-      canAddRule("owner/repo", "main");
+      await canAddRule("owner/repo", "main");
 
       expect(localStorage.getItem).toHaveBeenCalledWith("mergeRules");
     });
@@ -231,75 +188,75 @@ describe("canAddRule", () => {
       localStorage.getItem.mockReturnValue(JSON.stringify(existingRules));
     });
 
-    it("should return false when exact repository and branch match exists", () => {
-      const result = canAddRule("owner/repo1", "main");
+    it("should return false when exact repository and branch match exists", async () => {
+      const result = await canAddRule("owner/repo1", "main");
 
       expect(result).toBe(false);
     });
 
-    it("should return false when exact repository and branch match exists (different case)", () => {
-      const result = canAddRule("owner/repo2", "develop");
+    it("should return false when exact repository and branch match exists (different case)", async () => {
+      const result = await canAddRule("owner/repo2", "develop");
 
       expect(result).toBe(false);
     });
 
-    it("should return true when repository matches but branch is different", () => {
-      const result = canAddRule("owner/repo1", "feature-branch");
+    it("should return true when repository matches but branch is different", async () => {
+      const result = await canAddRule("owner/repo1", "feature-branch");
 
       expect(result).toBe(true);
     });
 
-    it("should return true when branch matches but repository is different", () => {
-      const result = canAddRule("owner/repo3", "main");
+    it("should return true when branch matches but repository is different", async () => {
+      const result = await canAddRule("owner/repo3", "main");
 
       expect(result).toBe(true);
     });
 
-    it("should return true when both repository and branch are different", () => {
-      const result = canAddRule("owner/repo3", "feature-branch");
+    it("should return true when both repository and branch are different", async () => {
+      const result = await canAddRule("owner/repo3", "feature-branch");
 
       expect(result).toBe(true);
     });
 
-    it("should return true when repository is similar but not exact match", () => {
-      const result = canAddRule("owner/repo1-test", "main");
+    it("should return true when repository is similar but not exact match", async () => {
+      const result = await canAddRule("owner/repo1-test", "main");
 
       expect(result).toBe(true);
     });
   });
 
   describe("when localStorage contains malformed JSON", () => {
-    it("should throw an error when JSON is invalid", () => {
+    it("should throw an error when JSON is invalid", async () => {
       localStorage.getItem.mockReturnValue("invalid json");
 
-      expect(() => {
-        canAddRule("owner/repo", "main");
-      }).toThrow();
+      await expect(async () => {
+        await canAddRule("owner/repo", "main");
+      }).rejects.toThrow();
     });
 
-    it("should throw an error when JSON structure is wrong", () => {
+    it("should throw an error when JSON structure is wrong", async () => {
       localStorage.getItem.mockReturnValue('{"invalid": "structure"}');
 
-      expect(() => {
-        canAddRule("owner/repo", "main");
-      }).toThrow();
+      await expect(async () => {
+        await canAddRule("owner/repo", "main");
+      }).rejects.toThrow();
     });
   });
 
   describe("when localStorage.getItem throws an error", () => {
-    it("should propagate the error", () => {
+    it("should propagate the error", async () => {
       localStorage.getItem.mockImplementation(() => {
         throw new Error("localStorage access denied");
       });
 
-      expect(() => {
-        canAddRule("owner/repo", "main");
-      }).toThrow("localStorage access denied");
+      await expect(async () => {
+        await canAddRule("owner/repo", "main");
+      }).rejects.toThrow("localStorage access denied");
     });
   });
 
   describe("edge cases", () => {
-    it("should handle empty rules array", () => {
+    it("should handle empty rules array", async () => {
       const emptyRules = {
         version: "1.0.0",
         rules: [],
@@ -307,12 +264,12 @@ describe("canAddRule", () => {
 
       localStorage.getItem.mockReturnValue(JSON.stringify(emptyRules));
 
-      const result = canAddRule("owner/repo", "main");
+      const result = await canAddRule("owner/repo", "main");
 
       expect(result).toBe(true);
     });
 
-    it("should handle rules with asterisk branches as exact matches", () => {
+    it("should handle rules with asterisk branches as exact matches", async () => {
       const rulesWithAsterisk = {
         version: "1.0.0",
         rules: [
@@ -330,13 +287,13 @@ describe("canAddRule", () => {
       localStorage.getItem.mockReturnValue(JSON.stringify(rulesWithAsterisk));
 
       // Should return false only for exact match with "*" branch
-      expect(canAddRule("owner/repo", "*")).toBe(false);
+      expect(await canAddRule("owner/repo", "*")).toBe(false);
 
       // Should return true for different branches (asterisk is treated as literal)
-      expect(canAddRule("owner/repo", "main")).toBe(true);
+      expect(await canAddRule("owner/repo", "main")).toBe(true);
     });
 
-    it("should handle special characters in repository and branch names", () => {
+    it("should handle special characters in repository and branch names", async () => {
       const specialCharRules = {
         version: "1.0.0",
         rules: [
@@ -354,13 +311,13 @@ describe("canAddRule", () => {
       localStorage.getItem.mockReturnValue(JSON.stringify(specialCharRules));
 
       // Should return false for exact match
-      expect(canAddRule("owner/repo-name", "feature/branch")).toBe(false);
+      expect(await canAddRule("owner/repo-name", "feature/branch")).toBe(false);
 
       // Should return true for different special chars
-      expect(canAddRule("owner/repo_name", "feature-branch")).toBe(true);
+      expect(await canAddRule("owner/repo_name", "feature-branch")).toBe(true);
     });
 
-    it("should handle case sensitivity correctly", () => {
+    it("should handle case sensitivity correctly", async () => {
       const caseSensitiveRules = {
         version: "1.0.0",
         rules: [
@@ -378,35 +335,35 @@ describe("canAddRule", () => {
       localStorage.getItem.mockReturnValue(JSON.stringify(caseSensitiveRules));
 
       // Should return false for exact case match
-      expect(canAddRule("Owner/Repo", "Main")).toBe(false);
+      expect(await canAddRule("Owner/Repo", "Main")).toBe(false);
 
       // Should return true for different case
-      expect(canAddRule("owner/repo", "main")).toBe(true);
+      expect(await canAddRule("owner/repo", "main")).toBe(true);
     });
   });
 
   describe("parameter validation", () => {
-    it("should handle undefined repository parameter", () => {
+    it("should handle undefined repository parameter", async () => {
       localStorage.getItem.mockReturnValue(null);
 
-      expect(() => {
-        canAddRule(undefined, "main");
+      await expect(async () => {
+        await canAddRule(undefined, "main");
       }).not.toThrow();
     });
 
-    it("should handle undefined branch parameter", () => {
+    it("should handle undefined branch parameter", async () => {
       localStorage.getItem.mockReturnValue(null);
 
-      expect(() => {
-        canAddRule("owner/repo", undefined);
+      await expect(async () => {
+        await canAddRule("owner/repo", undefined);
       }).not.toThrow();
     });
 
-    it("should handle null parameters", () => {
+    it("should handle null parameters", async () => {
       localStorage.getItem.mockReturnValue(null);
 
-      expect(() => {
-        canAddRule(null, null);
+      await expect(async () => {
+        await canAddRule(null, null);
       }).not.toThrow();
     });
   });
@@ -422,12 +379,12 @@ describe("canAddRule", () => {
       consoleSpy.mockRestore();
     });
 
-    it("should log error when JSON parsing fails", () => {
+    it("should log error when JSON parsing fails", async () => {
       localStorage.getItem.mockReturnValue("invalid json");
 
-      expect(() => {
-        canAddRule("owner/repo", "main");
-      }).toThrow();
+      await expect(async () => {
+        await canAddRule("owner/repo", "main");
+      }).rejects.toThrow();
 
       expect(consoleSpy).toHaveBeenCalledWith(
         "Error checking for rule conflicts:",

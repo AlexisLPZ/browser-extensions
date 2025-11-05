@@ -2,25 +2,21 @@
  * Popup script for GitHub PR Merge Method extension
  *
  * This file depends on globals defined in other scripts loaded before it:
- * - utils.js: Core utility functions for rule validation and management
+ * - constants.js: Shared constants
+ * - rules_utils.js: Core utility functions for rule validation and management
+ * - storage.js: Storage abstraction layer
  * - templates.js: HTML/CSS template functions for UI rendering
  *
  * These globals are available at runtime because the scripts are loaded
  * in order in popup.html. The eslint-disable-next-line comment below
  * tells ESLint about these expected globals to avoid false "no-undef" errors.
  */
-/* global validateRule, canAddRule, createMergeRule, DEFAULT_RULES_COLLECTION, getNoRulesTemplate, getRuleItemTemplate, getToastInlineStyles, getToastStyles */
-
-/**
- * Escapes HTML to prevent XSS
- * @param {string} text - Text to escape
- * @returns {string} - Escaped text
- */
-function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.textContent = text; // Browser auto-escapes when using textContent
-  return div.innerHTML; // Returns the escaped version
-}
+/* global 
+   validateRule, canAddRule, createMergeRule, 
+   DEFAULT_RULES_COLLECTION, getNoRulesTemplate, 
+   getRuleItemTemplate, getToastInlineStyles, 
+   getToastStyles, getRules, setRules, escapeHtml 
+*/
 
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
@@ -34,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadAndDisplayRules();
 
   // Handle form submission for adding a new rule
-  addRuleForm.addEventListener("submit", (e) => {
+  addRuleForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     // Get form values
@@ -49,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Check if rule already exists (no conflicts)
-    if (!canAddRule(repository, branch)) {
+    const canAdd = await canAddRule(repository, branch);
+    if (!canAdd) {
       alert(
         `A rule for repository "${repository}" and branch "${branch}" already exists. Please edit the existing rule instead.`
       );
@@ -60,38 +57,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const newRule = createMergeRule(repository, branch, mergeMethod);
 
     // Get existing rules from storage
-    const rulesCollection = JSON.parse(
-      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
-    );
+    const rulesCollection = await getRules();
 
     // Add the new rule
     rulesCollection.rules.push(newRule);
 
     // Save back to storage
-    localStorage.setItem("mergeRules", JSON.stringify(rulesCollection));
+    await setRules(rulesCollection);
 
     // Reset the form
     addRuleForm.reset();
 
     // Reload and display the updated rules list
-    loadAndDisplayRules();
+    await loadAndDisplayRules();
 
     // Show success message (optional)
     showSuccessMessage("Rule added successfully!");
   });
 
   // Handle "Clear All Rules" button click
-  clearAllBtn.addEventListener("click", () => {
+  clearAllBtn.addEventListener("click", async () => {
     if (
       confirm(
         "Are you sure you want to delete all rules? This cannot be undone."
       )
     ) {
       // Clear all rules from storage
-      localStorage.setItem("mergeRules", DEFAULT_RULES_COLLECTION);
+      await setRules(JSON.parse(DEFAULT_RULES_COLLECTION));
 
       // Reload the display
-      loadAndDisplayRules();
+      await loadAndDisplayRules();
 
       // Show success message
       showSuccessMessage("All rules cleared successfully!");
@@ -104,11 +99,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Handle delete button clicks using event delegation
-  rulesList.addEventListener("click", (e) => {
+  rulesList.addEventListener("click", async (e) => {
     if (e.target.classList.contains("btn-delete")) {
       const ruleId = e.target.dataset.ruleId;
       if (confirm("Are you sure you want to delete this rule?")) {
-        deleteRule(ruleId);
+        await deleteRule(ruleId);
       }
     }
   });
@@ -116,11 +111,9 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Loads rules from storage and displays them in the UI
    */
-  function loadAndDisplayRules() {
+  async function loadAndDisplayRules() {
     // Get rules from storage
-    const rulesCollection = JSON.parse(
-      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
-    );
+    const rulesCollection = await getRules();
 
     const rules = rulesCollection.rules || [];
 
@@ -169,21 +162,19 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {string} ruleId - The ID of the rule to delete
    */
 
-  function deleteRule(ruleId) {
+  async function deleteRule(ruleId) {
     // Get existing rules from storage
-    const rulesCollection = JSON.parse(
-      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
-    );
+    const rulesCollection = await getRules();
 
     // Filter out the rule to delete
     rulesCollection.rules = rulesCollection.rules.filter(
       (rule) => rule.id !== ruleId
     );
     // Save back to storage
-    localStorage.setItem("mergeRules", JSON.stringify(rulesCollection));
+    await setRules(rulesCollection);
 
     // Reload and display the updated rules list
-    loadAndDisplayRules();
+    await loadAndDisplayRules();
 
     // Show success message
     showSuccessMessage("Rule deleted successfully!");
@@ -192,11 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Exports rules as a JSON file
    */
-  function exportRules() {
+  async function exportRules() {
     // Get rules from storage
-    const rulesCollection = JSON.parse(
-      localStorage.getItem("mergeRules") || DEFAULT_RULES_COLLECTION
-    );
+    const rulesCollection = await getRules();
 
     // Create a blob with the JSON data
     const jsonString = JSON.stringify(rulesCollection, null, 2);
@@ -251,11 +240,4 @@ if (typeof window !== "undefined" && typeof getToastStyles === "function") {
   const style = document.createElement("style");
   style.textContent = getToastStyles();
   document.head.appendChild(style);
-}
-
-// Export for CommonJS (Node.js, Jest, etc.)
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = {
-    escapeHtml,
-  };
 }
