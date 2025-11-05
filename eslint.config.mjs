@@ -44,6 +44,17 @@ export default [
       "no-console": "off", // Allow console.log for debugging extensions
       "no-debugger": "error",
       "no-alert": "warn", // You're using alert() - consider disabling
+      "max-len": [
+        "warn",
+        {
+          code: 80,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreRegExpLiterals: true,
+          ignoreComments: false,
+        },
+      ],
 
       // Best practices
       eqeqeq: ["error", "always"], // Use === instead of ==

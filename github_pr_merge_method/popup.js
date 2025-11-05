@@ -11,7 +11,12 @@
  * in order in popup.html. The eslint-disable-next-line comment below
  * tells ESLint about these expected globals to avoid false "no-undef" errors.
  */
-/* global validateRule, canAddRule, createMergeRule, DEFAULT_RULES_COLLECTION, getNoRulesTemplate, getRuleItemTemplate, getToastInlineStyles, getToastStyles, getRules, setRules, escapeHtml */
+/* global 
+   validateRule, canAddRule, createMergeRule, 
+   DEFAULT_RULES_COLLECTION, getNoRulesTemplate, 
+   getRuleItemTemplate, getToastInlineStyles, 
+   getToastStyles, getRules, setRules, escapeHtml 
+*/
 
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
