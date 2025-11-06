@@ -12,7 +12,7 @@
  * tells ESLint about these expected globals to avoid false "no-undef" errors.
  */
 /* global 
-   validateRule, canAddRule, createMergeRule, 
+   validateRule, canAddRule, createMergeRule, checkDuplicateRuleIds, checkDuplicateRules,
    DEFAULT_RULES_COLLECTION, getNoRulesTemplate, 
    getRuleItemTemplate, getToastInlineStyles, 
    getToastStyles, getRules, setRules, escapeHtml 
@@ -25,6 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const rulesList = document.getElementById("rulesList");
   const clearAllBtn = document.getElementById("clearAllBtn");
   const exportRulesBtn = document.getElementById("exportRulesBtn");
+  const importRulesBtn = document.getElementById("importRulesBtn");
+  const importFileInput = document.getElementById("importFileInput");
 
   // Initialize the popup by loading and displaying existing rules
   loadAndDisplayRules();
@@ -98,6 +100,21 @@ document.addEventListener("DOMContentLoaded", () => {
     exportRules();
   });
 
+  // Handle "Import Rules" button click
+  importRulesBtn.addEventListener("click", () => {
+    importFileInput.click();
+  });
+
+  // Handle file selection for import
+  importFileInput.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      await importRules(file);
+      // Reset the input so the same file can be imported again if needed
+      importFileInput.value = "";
+    }
+  });
+
   // Handle delete button clicks using event delegation
   rulesList.addEventListener("click", async (e) => {
     if (e.target.classList.contains("btn-delete")) {
@@ -120,7 +137,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Clear the rules list
     rulesList.innerHTML = "";
 
-    // Show/hide the "Clear All" and "Export" buttons based on whether rules exist
+    // Show/hide the "Clear All", "Export", and "Import" buttons based on whether rules exist
+    // Import button is always visible to allow importing rules even when list is empty
+    importRulesBtn.style.display = "block";
+
     if (rules.length === 0) {
       clearAllBtn.style.display = "none";
       exportRulesBtn.style.display = "none";
@@ -213,6 +233,113 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
+   * Imports rules from a JSON file
+   * @param {File} file - The file to import
+   */
+  async function importRules(file) {
+    try {
+      // Read the file
+      const fileContent = await file.text();
+
+      // Parse JSON
+      let importedData;
+      try {
+        importedData = JSON.parse(fileContent);
+      } catch {
+        showErrorMessage("Invalid JSON file. Please check the file format.");
+        return;
+      }
+
+      // Validate the structure
+      if (!importedData || typeof importedData !== "object") {
+        showErrorMessage("Invalid rules file structure.");
+        return;
+      }
+
+      if (!importedData.version) {
+        showErrorMessage("Missing version field in rules file.");
+        return;
+      }
+
+      if (!Array.isArray(importedData.rules)) {
+        showErrorMessage("Invalid rules format. Expected an array of rules.");
+        return;
+      }
+
+      // Check for duplicate rule IDs
+      const duplicateIdErrors = checkDuplicateRuleIds(importedData.rules);
+
+      // If there are duplicate IDs, show errors and abort import
+      if (duplicateIdErrors.length > 0) {
+        const errorMessage =
+          "Import failed. Duplicate IDs detected:\n\n" +
+          duplicateIdErrors.join("\n");
+        showErrorMessage(errorMessage);
+        return;
+      }
+
+      // Check for duplicate rules (same repository and branch)
+      const duplicateRuleErrors = checkDuplicateRules(importedData.rules);
+
+      // If there are duplicate rules, show errors and abort import
+      if (duplicateRuleErrors.length > 0) {
+        const errorMessage =
+          "Import failed. Duplicate rules detected:\n\n" +
+          duplicateRuleErrors.join("\n");
+        showErrorMessage(errorMessage);
+        return;
+      }
+
+      // Validate each rule
+      const validationErrors = [];
+      for (let i = 0; i < importedData.rules.length; i++) {
+        const rule = importedData.rules[i];
+
+        // Check required fields
+        if (!rule.repository || !rule.branch || !rule.mergeMethod) {
+          validationErrors.push(
+            `Rule ${i + 1}: Missing required fields (repository, branch, or mergeMethod)`
+          );
+          continue;
+        }
+
+        // Validate using the validateRule function
+        if (!validateRule(rule.repository, rule.branch, rule.mergeMethod)) {
+          validationErrors.push(
+            `Rule ${i + 1}: Invalid rule for ${rule.repository}/${rule.branch}`
+          );
+        }
+      }
+
+      // If there are validation errors, show them and abort import
+      if (validationErrors.length > 0) {
+        const errorMessage =
+          "Import failed. Invalid rules detected:\n\n" +
+          validationErrors.join("\n");
+        showErrorMessage(errorMessage);
+        return;
+      }
+
+      // All rules are valid, proceed with import
+      // Override existing rules in storage
+      await setRules(importedData);
+
+      // Reload and display the updated rules list
+      await loadAndDisplayRules();
+
+      // Show success message
+      showSuccessMessage(
+        `Successfully imported ${importedData.rules.length} rule(s)!`
+      );
+    } catch (error) {
+      console.error("Error importing rules:", error);
+      showErrorMessage(
+        "An error occurred while importing rules. Please try again."
+      );
+    }
+  }
+
+  /**
    * Shows a success message to the user
    * @param {string} message - The message to show
    */
@@ -232,6 +359,40 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.removeChild(toast);
       }, 300);
     }, 3000);
+  }
+
+  /**
+   * Shows an error message to the user
+   * @param {string} message - The message to show
+   */
+  function showErrorMessage(message) {
+    // Create a simple toast notification for errors
+    const toast = document.createElement("div");
+    toast.className = "toast error";
+    toast.style.cssText =
+      getToastInlineStyles() +
+      "background-color: #ef4444; white-space: pre-line;";
+
+    document.body.appendChild(toast);
+
+    // For multi-line error messages, use a pre element
+    if (message.includes("\n")) {
+      const pre = document.createElement("pre");
+      pre.textContent = message;
+      pre.style.cssText =
+        "margin: 0; font-family: inherit; white-space: pre-wrap; word-wrap: break-word;";
+      toast.appendChild(pre);
+    } else {
+      toast.textContent = message;
+    }
+
+    // Remove the toast after 5 seconds (longer for error messages)
+    setTimeout(() => {
+      toast.style.animation = "slideOut 0.3s ease-out";
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 5000);
   }
 });
 

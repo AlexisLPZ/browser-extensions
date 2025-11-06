@@ -65,6 +65,9 @@
         >
           Export Rules
         </button>
+        <button id="importRulesBtn" class="btn btn-secondary">
+          Import Rules
+        </button>
         <button
           id="clearAllBtn"
           class="btn btn-secondary"
@@ -73,6 +76,12 @@
           Clear All Rules
         </button>
       </div>
+      <input
+        type="file"
+        id="importFileInput"
+        accept="application/json"
+        style="display: none"
+      />
     </div>
     <script src="constants.js"></script>
     <script src="rules_utils.js"></script>

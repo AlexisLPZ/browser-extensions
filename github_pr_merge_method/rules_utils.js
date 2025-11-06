@@ -121,6 +121,60 @@ function createMergeRule(repository, branch, mergeMethod) {
 }
 
 /**
+ * Checks for duplicate rule IDs in an array of rules
+ * @param {MergeRule[]} rules - Array of rules to check
+ * @returns {string[]} - Array of error messages (empty if no duplicate IDs found)
+ */
+function checkDuplicateRuleIds(rules) {
+  const duplicateErrors = [];
+  const seenIds = new Map(); // Map to track rule IDs and their positions
+
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
+    if (rule.id) {
+      if (seenIds.has(rule.id)) {
+        const firstIndex = seenIds.get(rule.id);
+        duplicateErrors.push(
+          `Duplicate ID detected: Rules ${firstIndex + 1} and ${i + 1} both have ID "${rule.id}"`
+        );
+      } else {
+        seenIds.set(rule.id, i);
+      }
+    }
+  }
+
+  return duplicateErrors;
+}
+
+/**
+ * Checks for duplicate rules (same repository and branch) in an array of rules
+ * @param {MergeRule[]} rules - Array of rules to check
+ * @returns {string[]} - Array of error messages (empty if no duplicates found)
+ */
+function checkDuplicateRules(rules) {
+  const duplicateErrors = [];
+  const ruleKeys = new Map(); // Map to track repository/branch combinations
+
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
+    if (rule.repository && rule.branch) {
+      const key = `${rule.repository}|||${rule.branch}`;
+
+      if (ruleKeys.has(key)) {
+        const firstIndex = ruleKeys.get(key);
+        duplicateErrors.push(
+          `Duplicate rule detected: Rules ${firstIndex + 1} and ${i + 1} both target ${rule.repository}/${rule.branch}`
+        );
+      } else {
+        ruleKeys.set(key, i);
+      }
+    }
+  }
+
+  return duplicateErrors;
+}
+
+/**
  * Checks if a rule with the same repository and branch already exists in storage
  * @param {string} repository - Repository in format "owner/repo"
  * @param {string} branch - Target branch name
@@ -163,6 +217,8 @@ if (typeof module !== "undefined" && module.exports) {
     generateRuleId,
     createMergeRule,
     canAddRule,
+    checkDuplicateRuleIds,
+    checkDuplicateRules,
   };
 }
 
@@ -172,4 +228,6 @@ if (typeof window !== "undefined") {
   window.generateRuleId = generateRuleId;
   window.createMergeRule = createMergeRule;
   window.canAddRule = canAddRule;
+  window.checkDuplicateRuleIds = checkDuplicateRuleIds;
+  window.checkDuplicateRules = checkDuplicateRules;
 }
