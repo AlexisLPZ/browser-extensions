@@ -121,6 +121,34 @@ function createMergeRule(repository, branch, mergeMethod) {
 }
 
 /**
+ * Checks for duplicate rules (same repository and branch) in an array of rules
+ * @param {MergeRule[]} rules - Array of rules to check
+ * @returns {string[]} - Array of error messages (empty if no duplicates found)
+ */
+function checkDuplicateRules(rules) {
+  const duplicateErrors = [];
+  const ruleKeys = new Map(); // Map to track repository/branch combinations
+
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
+    if (rule.repository && rule.branch) {
+      const key = `${rule.repository}|||${rule.branch}`;
+
+      if (ruleKeys.has(key)) {
+        const firstIndex = ruleKeys.get(key);
+        duplicateErrors.push(
+          `Duplicate rule detected: Rules ${firstIndex + 1} and ${i + 1} both target ${rule.repository}/${rule.branch}`
+        );
+      } else {
+        ruleKeys.set(key, i);
+      }
+    }
+  }
+
+  return duplicateErrors;
+}
+
+/**
  * Checks if a rule with the same repository and branch already exists in storage
  * @param {string} repository - Repository in format "owner/repo"
  * @param {string} branch - Target branch name
@@ -163,6 +191,7 @@ if (typeof module !== "undefined" && module.exports) {
     generateRuleId,
     createMergeRule,
     canAddRule,
+    checkDuplicateRules,
   };
 }
 
@@ -172,4 +201,5 @@ if (typeof window !== "undefined") {
   window.generateRuleId = generateRuleId;
   window.createMergeRule = createMergeRule;
   window.canAddRule = canAddRule;
+  window.checkDuplicateRules = checkDuplicateRules;
 }
