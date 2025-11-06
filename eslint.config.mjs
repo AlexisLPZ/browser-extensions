@@ -43,7 +43,6 @@ export default [
       "no-undef": "error",
       "no-console": "off", // Allow console.log for debugging extensions
       "no-debugger": "error",
-      "no-alert": "warn", // You're using alert() - consider disabling
       "max-len": [
         "warn",
         {
