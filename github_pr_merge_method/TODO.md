@@ -1,12 +1,45 @@
 # GitHub Merge Method Auto-Selector Extension - TODO
 
-## User Stories
-
-- As a developer, I want to manage multiple rules without memory constraints
-
-## Implementation Steps
+## Development steps
 
 - [ ] Update rules list display with edit functionality
 - [ ] Style options page with modern CSS
 - [ ] Add helpful tooltips and descriptions
 - [ ] Add rule limit (e.g., max 50 rules) with clear messaging
+
+## Publish steps
+
+- [ ] Add icon image (128x128px minimum, also consider 16x16, 48x48)
+- [ ] Add screenshots (1280x800 or 640x400 recommended)
+- [ ] Add promotional images (varies by store)
+- [ ] Add privacy policy, notably because using `storage` permission. Only request permissions you actually use.
+- [ ] Add README
+- [ ] Add license information
+- [ ] Remove console.log statements
+- [ ] Create zip file
+
+```bash
+#!/bin/bash
+# build.sh
+
+EXTENSION_DIR="github_pr_merge_method"
+OUTPUT_NAME="github-pr-merge-method-v1.0.0.zip"
+
+cd "$EXTENSION_DIR"
+
+zip -r "../$OUTPUT_NAME" . \
+  -x "*.test.js" \
+  -x "*.md" \
+  -x "TODO.md" \
+  -x "node_modules/*" \
+  -x ".git/*" \
+  -x ".gitignore" \
+  -x "*.log"
+
+echo "Package created: $OUTPUT_NAME"
+```
+
+See existing extensions:
+
+- [github-pr-merge-strategy](https://chromewebstore.google.com/detail/github-pr-merge-strategy/nhejampjhfhnalboieehcfhehmmfljhg)
+- [github-pr-merge-button-cu](https://chromewebstore.google.com/detail/github-pr-merge-button-cu/bpafckemfjmkpojmcikjnhlcnohpejbn)
