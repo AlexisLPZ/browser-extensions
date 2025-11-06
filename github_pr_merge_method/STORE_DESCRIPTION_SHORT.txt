@@ -1,0 +1,110 @@
+===== SHORT DESCRIPTION (132 chars max) =====
+
+Automatically select the correct merge method (squash/merge/rebase) for your GitHub pull requests based on custom rules.
+
+
+===== DETAILED DESCRIPTION (Copy-paste ready) =====
+
+Never Use the Wrong Merge Method Again
+
+Tired of accidentally using the wrong merge strategy on GitHub pull requests? This extension automatically selects your preferred merge method (Squash, Merge, or Rebase) based on rules you define for each repository and branch.
+
+
+WHY YOU NEED THIS
+
+GitHub doesn't let you set default merge methods per branch or repository. This leads to common mistakes:
+  • Accidentally squashing when you meant to preserve commit history
+  • Using merge commits when you wanted a clean, squashed commit  
+  • Forgetting your team's merge conventions for different branches
+
+This extension solves all of that automatically.
+
+
+KEY FEATURES
+
+✨ Automatic Selection - Opens any GitHub PR? Your preferred merge method is already selected
+🎯 Rule-Based - Set different methods for different repos and branches
+💾 Import/Export - Backup your rules or share them with your team
+🔒 100% Private - All data stays in your browser, nothing is sent anywhere
+⚡ Lightweight - No impact on your browsing speed
+
+
+HOW IT WORKS
+
+1. Define your rules: "For repository X, branch Y, use method Z"
+2. Open any GitHub pull request
+3. The correct merge method is automatically selected
+4. Review and merge with confidence
+
+That's it. No more mistakes.
+
+
+REAL-WORLD EXAMPLES
+
+Example 1: Clean Main Branch
+  • All PRs to "main" → Squash (one clean commit per feature)
+  • Keeps your main branch history readable
+
+Example 2: Preserve Release History
+  • PRs to "release/*" branches → Merge (keep full commit history)  
+  • Perfect for audit trails and debugging
+
+Example 3: Linear Development
+  • PRs to "develop" → Rebase (clean, linear history)
+  • Makes git history easier to follow
+
+
+SETUP IN 30 SECONDS
+
+1. Click the extension icon
+2. Add a rule (e.g., "facebook/react" + "main" = "squash")
+3. Visit any PR to that branch
+4. Watch it work ✨
+
+
+IMPORT & EXPORT YOUR RULES
+
+Created the perfect rule set? Export it as JSON and:
+  • Back it up for safekeeping
+  • Share it with your team
+  • Sync across multiple computers
+  • Use it as a template for new projects
+
+
+YOUR PRIVACY MATTERS
+
+🔒 Zero data collection - We don't track, store, or transmit anything
+🔒 Local storage only - Rules stay in your browser
+🔒 No account needed - Works completely offline
+
+We literally cannot see your data - and that's by design.
+
+
+PERMISSIONS EXPLAINED
+
+  • Storage: Saves your rules locally in your browser
+  • GitHub Access: Reads PR pages to automatically select merge methods
+
+That's it. No hidden permissions, no surprises.
+
+
+FREQUENTLY ASKED QUESTIONS
+
+Q: Does this work with GitHub Enterprise?
+A: Yes! Works on any GitHub PR page.
+
+Q: Can I use wildcards for repositories or branches?
+A: Not yet - currently requires exact repository and branch names.
+
+Q: What happens if I don't have a rule for a PR?
+A: The extension does nothing - GitHub's default selection remains.
+
+Q: Can I have multiple rules for the same repository?
+A: Yes! Each repository can have different rules for different branches.
+
+Q: Is this free?
+A: Yes, completely free with no ads or upsells.
+
+
+Perfect for solo developers, teams, open source maintainers, and anyone who's ever clicked the wrong merge button.
+
