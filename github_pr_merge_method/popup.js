@@ -12,7 +12,7 @@
  * tells ESLint about these expected globals to avoid false "no-undef" errors.
  */
 /* global 
-   validateRule, canAddRule, createMergeRule, checkDuplicateRules,
+   validateRule, canAddRule, createMergeRule, checkDuplicateRuleIds, checkDuplicateRules,
    DEFAULT_RULES_COLLECTION, getNoRulesTemplate, 
    getRuleItemTemplate, getToastInlineStyles, 
    getToastStyles, getRules, setRules, escapeHtml 
@@ -266,14 +266,26 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // Check for duplicate rule IDs
+      const duplicateIdErrors = checkDuplicateRuleIds(importedData.rules);
+
+      // If there are duplicate IDs, show errors and abort import
+      if (duplicateIdErrors.length > 0) {
+        const errorMessage =
+          "Import failed. Duplicate IDs detected:\n\n" +
+          duplicateIdErrors.join("\n");
+        showErrorMessage(errorMessage);
+        return;
+      }
+
       // Check for duplicate rules (same repository and branch)
-      const duplicateErrors = checkDuplicateRules(importedData.rules);
+      const duplicateRuleErrors = checkDuplicateRules(importedData.rules);
 
       // If there are duplicate rules, show errors and abort import
-      if (duplicateErrors.length > 0) {
+      if (duplicateRuleErrors.length > 0) {
         const errorMessage =
           "Import failed. Duplicate rules detected:\n\n" +
-          duplicateErrors.join("\n");
+          duplicateRuleErrors.join("\n");
         showErrorMessage(errorMessage);
         return;
       }

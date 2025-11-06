@@ -121,6 +121,32 @@ function createMergeRule(repository, branch, mergeMethod) {
 }
 
 /**
+ * Checks for duplicate rule IDs in an array of rules
+ * @param {MergeRule[]} rules - Array of rules to check
+ * @returns {string[]} - Array of error messages (empty if no duplicate IDs found)
+ */
+function checkDuplicateRuleIds(rules) {
+  const duplicateErrors = [];
+  const seenIds = new Map(); // Map to track rule IDs and their positions
+
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
+    if (rule.id) {
+      if (seenIds.has(rule.id)) {
+        const firstIndex = seenIds.get(rule.id);
+        duplicateErrors.push(
+          `Duplicate ID detected: Rules ${firstIndex + 1} and ${i + 1} both have ID "${rule.id}"`
+        );
+      } else {
+        seenIds.set(rule.id, i);
+      }
+    }
+  }
+
+  return duplicateErrors;
+}
+
+/**
  * Checks for duplicate rules (same repository and branch) in an array of rules
  * @param {MergeRule[]} rules - Array of rules to check
  * @returns {string[]} - Array of error messages (empty if no duplicates found)
@@ -191,6 +217,7 @@ if (typeof module !== "undefined" && module.exports) {
     generateRuleId,
     createMergeRule,
     canAddRule,
+    checkDuplicateRuleIds,
     checkDuplicateRules,
   };
 }
@@ -201,5 +228,6 @@ if (typeof window !== "undefined") {
   window.generateRuleId = generateRuleId;
   window.createMergeRule = createMergeRule;
   window.canAddRule = canAddRule;
+  window.checkDuplicateRuleIds = checkDuplicateRuleIds;
   window.checkDuplicateRules = checkDuplicateRules;
 }
