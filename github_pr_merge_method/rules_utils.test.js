@@ -2,6 +2,8 @@ const { validateRule } = require("./rules_utils.js");
 const { generateRuleId } = require("./rules_utils.js");
 const { canAddRule } = require("./rules_utils.js");
 const { createMergeRule } = require("./rules_utils.js");
+const { checkDuplicateRuleIds } = require("./rules_utils.js");
+const { checkDuplicateRules } = require("./rules_utils.js");
 
 describe("validateRule", () => {
   test("should return true for valid inputs", () => {
@@ -390,6 +392,790 @@ describe("canAddRule", () => {
         "Error checking for rule conflicts:",
         expect.any(Error)
       );
+    });
+  });
+});
+
+describe("checkDuplicateRuleIds", () => {
+  describe("when rules array is empty or has no duplicates", () => {
+    it("should return empty array for empty rules array", () => {
+      const rules = [];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors).toEqual([]);
+      expect(errors.length).toBe(0);
+    });
+
+    it("should return empty array for single rule", () => {
+      const rules = [
+        {
+          id: "rule_1234567890_abc123def",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should return empty array when all IDs are unique", () => {
+      const rules = [
+        {
+          id: "rule_1234567890_abc123def",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_1234567891_def456ghi",
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_1234567892_ghi789jkl",
+          repository: "owner/repo3",
+          branch: "feature",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors).toEqual([]);
+    });
+  });
+
+  describe("when duplicate IDs exist", () => {
+    it("should detect duplicate IDs between two rules", () => {
+      const duplicateId = "rule_1234567890_abc123def";
+      const rules = [
+        {
+          id: duplicateId,
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: duplicateId,
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toContain("Duplicate ID detected");
+      expect(errors[0]).toContain("Rules 1 and 2");
+      expect(errors[0]).toContain(duplicateId);
+    });
+
+    it("should detect multiple instances of the same duplicate ID", () => {
+      const duplicateId = "rule_1234567890_abc123def";
+      const rules = [
+        {
+          id: duplicateId,
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: duplicateId,
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: duplicateId,
+          repository: "owner/repo3",
+          branch: "feature",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors.length).toBe(2);
+      expect(errors[0]).toContain("Rules 1 and 2");
+      expect(errors[1]).toContain("Rules 1 and 3");
+    });
+
+    it("should detect multiple different duplicate IDs", () => {
+      const rules = [
+        {
+          id: "rule_1111111111_aaaaaaaaa",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2222222222_bbbbbbbbb",
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_1111111111_aaaaaaaaa", // Duplicate of rule 1
+          repository: "owner/repo3",
+          branch: "feature",
+          mergeMethod: "rebase",
+        },
+        {
+          id: "rule_2222222222_bbbbbbbbb", // Duplicate of rule 2
+          repository: "owner/repo4",
+          branch: "staging",
+          mergeMethod: "squash",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors.length).toBe(2);
+      expect(errors[0]).toContain("rule_1111111111_aaaaaaaaa");
+      expect(errors[1]).toContain("rule_2222222222_bbbbbbbbb");
+    });
+
+    it("should provide informative error messages", () => {
+      const duplicateId = "rule_test_duplicate";
+      const rules = [
+        {
+          id: duplicateId,
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_unique",
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: duplicateId,
+          repository: "owner/repo3",
+          branch: "feature",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors[0]).toBe(
+        `Duplicate ID detected: Rules 1 and 3 both have ID "${duplicateId}"`
+      );
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should skip rules without ID field", () => {
+      const rules = [
+        {
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_1234567890_abc123def",
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should handle rules with null or undefined ID", () => {
+      const rules = [
+        {
+          id: null,
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: undefined,
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_1234567890_abc123def",
+          repository: "owner/repo3",
+          branch: "feature",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should handle rules with empty string ID", () => {
+      const rules = [
+        {
+          id: "",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "",
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      // Empty strings are falsy, so they should be skipped
+      expect(errors).toEqual([]);
+    });
+
+    it("should handle large number of rules efficiently", () => {
+      const rules = [];
+      for (let i = 0; i < 1000; i++) {
+        rules.push({
+          id: `rule_${i}_unique`,
+          repository: `owner/repo${i}`,
+          branch: "main",
+          mergeMethod: "squash",
+        });
+      }
+
+      const startTime = Date.now();
+      const errors = checkDuplicateRuleIds(rules);
+      const endTime = Date.now();
+
+      expect(errors).toEqual([]);
+      expect(endTime - startTime).toBeLessThan(100); // Should be fast
+    });
+
+    it("should report correct positions for non-consecutive duplicates", () => {
+      const duplicateId = "rule_duplicate";
+      const rules = [
+        {
+          id: "rule_unique_1",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: duplicateId,
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_unique_2",
+          repository: "owner/repo3",
+          branch: "staging",
+          mergeMethod: "rebase",
+        },
+        {
+          id: "rule_unique_3",
+          repository: "owner/repo4",
+          branch: "prod",
+          mergeMethod: "squash",
+        },
+        {
+          id: duplicateId,
+          repository: "owner/repo5",
+          branch: "feature",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRuleIds(rules);
+
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toContain("Rules 2 and 5");
+    });
+  });
+});
+
+describe("checkDuplicateRules", () => {
+  describe("when rules array is empty or has no duplicates", () => {
+    it("should return empty array for empty rules array", () => {
+      const rules = [];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+      expect(errors.length).toBe(0);
+    });
+
+    it("should return empty array for single rule", () => {
+      const rules = [
+        {
+          id: "rule_1234567890_abc123def",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should return empty array when all repo/branch combinations are unique", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo2",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo1",
+          branch: "develop",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should allow same branch for different repositories", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo2",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo3",
+          branch: "main",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should allow same repository for different branches", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo",
+          branch: "feature",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+    });
+  });
+
+  describe("when duplicate repo/branch combinations exist", () => {
+    it("should detect duplicate repo/branch between two rules", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toContain("Duplicate rule detected");
+      expect(errors[0]).toContain("Rules 1 and 2");
+      expect(errors[0]).toContain("owner/repo/main");
+    });
+
+    it("should detect multiple instances of the same duplicate repo/branch", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(2);
+      expect(errors[0]).toContain("Rules 1 and 2");
+      expect(errors[1]).toContain("Rules 1 and 3");
+    });
+
+    it("should detect multiple different duplicate repo/branch combinations", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo2",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo1",
+          branch: "main", // Duplicate of rule 1
+          mergeMethod: "rebase",
+        },
+        {
+          id: "rule_4",
+          repository: "owner/repo2",
+          branch: "develop", // Duplicate of rule 2
+          mergeMethod: "squash",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(2);
+      expect(errors[0]).toContain("owner/repo1/main");
+      expect(errors[1]).toContain("owner/repo2/develop");
+    });
+
+    it("should provide informative error messages", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "different/repo",
+          branch: "develop",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors[0]).toBe(
+        "Duplicate rule detected: Rules 1 and 3 both target owner/repo/main"
+      );
+    });
+
+    it("should detect duplicates even with different merge methods", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(1);
+    });
+
+    it("should detect duplicates even with different IDs", () => {
+      const rules = [
+        {
+          id: "rule_completely_different_1",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_completely_different_2",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(1);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should skip rules without repository field", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should skip rules without branch field", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should handle rules with null or undefined repository/branch", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: null,
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: undefined,
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "rebase",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors).toEqual([]);
+    });
+
+    it("should handle rules with empty string repository/branch", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      // Empty strings are falsy, so they should be skipped
+      expect(errors).toEqual([]);
+    });
+
+    it("should handle special characters in repository and branch names", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo-name",
+          branch: "feature/test",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo-name",
+          branch: "feature/test",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toContain("owner/repo-name/feature/test");
+    });
+
+    it("should be case-sensitive", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "Owner/Repo",
+          branch: "Main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      // Different cases should be treated as different rules
+      expect(errors).toEqual([]);
+    });
+
+    it("should handle wildcard branches as literal strings", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo",
+          branch: "*",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo",
+          branch: "*",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(1);
+    });
+
+    it("should handle large number of rules efficiently", () => {
+      const rules = [];
+      for (let i = 0; i < 1000; i++) {
+        rules.push({
+          id: `rule_${i}`,
+          repository: `owner/repo${i}`,
+          branch: "main",
+          mergeMethod: "squash",
+        });
+      }
+
+      const startTime = Date.now();
+      const errors = checkDuplicateRules(rules);
+      const endTime = Date.now();
+
+      expect(errors).toEqual([]);
+      expect(endTime - startTime).toBeLessThan(100); // Should be fast
+    });
+
+    it("should report correct positions for non-consecutive duplicates", () => {
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo1",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo2",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+        {
+          id: "rule_3",
+          repository: "owner/repo3",
+          branch: "develop",
+          mergeMethod: "rebase",
+        },
+        {
+          id: "rule_4",
+          repository: "owner/repo4",
+          branch: "staging",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_5",
+          repository: "owner/repo2",
+          branch: "main",
+          mergeMethod: "merge",
+        }, // Duplicate of rule 2
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toContain("Rules 2 and 5");
+    });
+
+    it("should handle repository names containing separator characters", () => {
+      // Using ||| as separator internally, make sure it doesn't break
+      const rules = [
+        {
+          id: "rule_1",
+          repository: "owner/repo|||special",
+          branch: "main",
+          mergeMethod: "squash",
+        },
+        {
+          id: "rule_2",
+          repository: "owner/repo|||special",
+          branch: "main",
+          mergeMethod: "merge",
+        },
+      ];
+      const errors = checkDuplicateRules(rules);
+
+      expect(errors.length).toBe(1);
     });
   });
 });
