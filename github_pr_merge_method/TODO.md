@@ -4,7 +4,6 @@
 
 - [ ] Update rules list display with edit functionality
 - [ ] Style options page with modern CSS
-- [ ] Add helpful tooltips and descriptions
 - [ ] Add rule limit (e.g., max 50 rules) with clear messaging
 
 ## Publish steps
@@ -12,8 +11,6 @@
 - [ ] Add icon image (128x128px minimum, also consider 16x16, 48x48)
 - [ ] Add screenshots (1280x800 or 640x400 recommended)
 - [ ] Add promotional images (varies by store)
-- [ ] Add privacy policy, notably because using `storage` permission. Only request permissions you actually use.
-- [ ] Add README
 - [ ] Add license information
 - [ ] Remove console.log statements
 - [ ] Create zip file
