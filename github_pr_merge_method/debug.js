@@ -1,5 +1,5 @@
 // debug.js
-const IS_DEV = true; // Set to false before publishing
+const IS_DEV = false; // Set to false before publishing
 
 // Export debug logger
 // eslint-disable-next-line no-redeclare
