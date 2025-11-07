@@ -1,0 +1,70 @@
+name: Production Ready Check
+
+on:
+    pull_request:
+        branches:
+            - main
+            - master
+
+jobs:
+    production-ready:
+        runs-on: ubuntu-latest
+        name: Ensure code is production-ready
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Check IS_DEV is false
+              run: |
+                  echo "🔍 Checking if IS_DEV is set to false..."
+
+                  if [ ! -f "github_pr_merge_method/debug.js" ]; then
+                    echo "❌ Error: debug.js not found!"
+                    exit 1
+                  fi
+
+                  if grep -E "const\s+IS_DEV\s*=\s*true" github_pr_merge_method/debug.js; then
+                    echo "❌ FAILED: IS_DEV is set to true"
+                    echo "📝 Set IS_DEV = false in github_pr_merge_method/debug.js"
+                    exit 1
+                  fi
+
+                  if grep -E "const\s+IS_DEV\s*=\s*false" github_pr_merge_method/debug.js; then
+                    echo "✅ IS_DEV is correctly set to false"
+                  else
+                    echo "⚠️ Could not determine IS_DEV value"
+                    exit 1
+                  fi
+
+            - name: Check for remaining console.log (optional)
+              run: |
+                  echo "🔍 Checking for console.log statements (excluding debug.js and tests)..."
+
+                  # Count console.log occurrences (excluding test files and debug.js)
+                  COUNT=$(grep -r "console\.log" github_pr_merge_method/ \
+                    --include="*.js" \
+                    --exclude="*.test.js" \
+                    --exclude="debug.js" \
+                    --exclude="constants.js" \
+                    | wc -l)
+
+                  if [ "$COUNT" -gt 0 ]; then
+                    echo "⚠️  WARNING: Found $COUNT console.log statements"
+                    echo "Consider removing them or using debug.log instead"
+                    echo ""
+                    grep -r "console\.log" github_pr_merge_method/ \
+                      --include="*.js" \
+                      --exclude="*.test.js" \
+                      --exclude="debug.js" \
+                      --exclude="constants.js" \
+                      -n
+                    # Uncomment to make this a hard failure:
+                    # exit 1
+                  else
+                    echo "✅ No console.log statements found"
+                  fi
+
+            - name: Success
+              if: success()
+              run: echo "🎉 Production ready checks passed!"
