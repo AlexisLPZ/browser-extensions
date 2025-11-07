@@ -66,7 +66,7 @@ function validateRule(repository, branch, mergeMethod) {
   try {
     // Validate inputs
     if (!repository || !branch || !mergeMethod) {
-      console.error(
+      debug.warn(
         "All parameters are required: repository, branch, mergeMethod"
       );
       return false;
@@ -75,19 +75,19 @@ function validateRule(repository, branch, mergeMethod) {
     // Validate merge method
     const validMergeMethods = Object.values(MERGE_METHODS);
     if (!validMergeMethods.includes(mergeMethod)) {
-      console.error("Invalid merge method. Must be one of:", validMergeMethods);
+      debug.warn("Invalid merge method. Must be one of:", validMergeMethods);
       return false;
     }
 
     // Validate repository format (basic check)
     if (!repository.includes("/") || repository.split("/").length !== 2) {
-      console.error('Repository must be in format "owner/repo"');
+      debug.warn('Repository must be in format "owner/repo"');
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error("Error with validating rule:", error);
+    debug.warn("Error with validating rule:", error);
     return false;
   }
 }
@@ -205,7 +205,7 @@ async function canAddRule(repository, branch) {
     // Return true if no conflict (can add), false if conflict exists (should edit)
     return !conflictExists;
   } catch (error) {
-    console.error("Error checking for rule conflicts:", error);
+    debug.warn("Error checking for rule conflicts:", error);
     throw error; // Let the caller handle it
   }
 }

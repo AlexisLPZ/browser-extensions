@@ -32,7 +32,7 @@ async function getRules() {
         : '{"version":"1.0.0","rules":[]}';
     return JSON.parse(defaultCollection);
   } catch (error) {
-    console.error("[Storage] Error getting rules:", error);
+    debug.warn("[Storage] Error getting rules:", error);
     const defaultCollection =
       typeof DEFAULT_RULES_COLLECTION !== "undefined"
         ? DEFAULT_RULES_COLLECTION
@@ -52,7 +52,7 @@ async function setRules(rulesCollection) {
       [STORAGE_KEY]: rulesCollection,
     });
   } catch (error) {
-    console.error("[Storage] Error saving rules:", error);
+    debug.warn("[Storage] Error saving rules:", error);
     throw error;
   }
 }
@@ -65,7 +65,7 @@ async function clearRules() {
   try {
     await browserAPI.storage.local.remove(STORAGE_KEY);
   } catch (error) {
-    console.error("[Storage] Error clearing rules:", error);
+    debug.warn("[Storage] Error clearing rules:", error);
     throw error;
   }
 }

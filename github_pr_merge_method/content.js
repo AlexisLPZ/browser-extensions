@@ -154,18 +154,18 @@ function getMergeMethodDropdownButton() {
   // First, find the main merge button (shows current method like "Squash and merge")
   const mainButton = getMainMergeButton();
   if (!mainButton) {
-    console.log("[GitHub PR Merge Method] Main merge button not found");
+    debug.log("[GitHub PR Merge Method] Main merge button not found");
     return null;
   }
 
   // Find the ButtonGroup container that holds both the main button and dropdown
   const buttonGroup = mainButton.closest('[class*="ButtonGroup"]');
   if (!buttonGroup) {
-    console.log("[GitHub PR Merge Method] ButtonGroup not found");
+    debug.log("[GitHub PR Merge Method] ButtonGroup not found");
     return null;
   }
 
-  console.log("[GitHub PR Merge Method] Found ButtonGroup:", buttonGroup);
+  debug.log("[GitHub PR Merge Method] Found ButtonGroup:", buttonGroup);
 
   // Look for the IconButton with triangle-down within the same ButtonGroup
   const dropdownButtons = buttonGroup.querySelectorAll(
@@ -175,7 +175,7 @@ function getMergeMethodDropdownButton() {
   for (const button of dropdownButtons) {
     const svg = button.querySelector(".octicon-triangle-down");
     if (svg) {
-      console.log(
+      debug.log(
         "[GitHub PR Merge Method] Found merge dropdown button:",
         button
       );
@@ -183,7 +183,7 @@ function getMergeMethodDropdownButton() {
     }
   }
 
-  console.log(
+  debug.log(
     "[GitHub PR Merge Method] Dropdown button not found in ButtonGroup"
   );
   return null;
@@ -197,11 +197,11 @@ async function openMergeMethodDropdown() {
   const dropdownButton = getMergeMethodDropdownButton();
 
   if (!dropdownButton) {
-    console.log("[GitHub PR Merge Method] Dropdown button not found");
+    debug.log("[GitHub PR Merge Method] Dropdown button not found");
     return false;
   }
 
-  console.log("[GitHub PR Merge Method] Clicking dropdown button...");
+  debug.log("[GitHub PR Merge Method] Clicking dropdown button...");
   dropdownButton.click();
 
   // Wait a bit for the menu to appear
@@ -217,20 +217,18 @@ async function openMergeMethodDropdown() {
 function getMergeMethodMenuItems() {
   const items = {};
 
-  console.log(
-    "[GitHub PR Merge Method] Looking for merge method menu items..."
-  );
+  debug.log("[GitHub PR Merge Method] Looking for merge method menu items...");
 
   // Find the specific menu that contains merge methods
   // The menu has aria-labelledby matching the dropdown button's aria-labelledby
   const dropdownButton = getMergeMethodDropdownButton();
   if (!dropdownButton) {
-    console.log("[GitHub PR Merge Method] Dropdown button not found");
+    debug.log("[GitHub PR Merge Method] Dropdown button not found");
     return items;
   }
 
   const ariaLabelledBy = dropdownButton.getAttribute("aria-labelledby");
-  console.log(
+  debug.log(
     "[GitHub PR Merge Method] Dropdown button aria-labelledby:",
     ariaLabelledBy
   );
@@ -245,11 +243,11 @@ function getMergeMethodMenuItems() {
   }
 
   if (!mergeMethodMenu) {
-    console.log(
+    debug.log(
       "[GitHub PR Merge Method] Could not find merge method menu, searching all visible items..."
     );
   } else {
-    console.log(
+    debug.log(
       "[GitHub PR Merge Method] Found merge method menu:",
       mergeMethodMenu
     );
@@ -260,7 +258,7 @@ function getMergeMethodMenuItems() {
     ? mergeMethodMenu.querySelectorAll('li[role="menuitemradio"]')
     : document.querySelectorAll('li[role="menuitemradio"]');
 
-  console.log(
+  debug.log(
     "[GitHub PR Merge Method] Found menuitemradio elements:",
     menuItems.length
   );
@@ -286,7 +284,7 @@ function getMergeMethodMenuItems() {
     return isVisible && (isSquash || isRebase || isMergeCommit);
   });
 
-  console.log(
+  debug.log(
     "[GitHub PR Merge Method] Visible merge method items:",
     visibleMergeItems.length
   );
@@ -299,22 +297,22 @@ function getMergeMethodMenuItems() {
       : item.textContent.toLowerCase();
 
     const ariaChecked = item.getAttribute("aria-checked");
-    console.log(
+    debug.log(
       `[GitHub PR Merge Method] Item ${idx}: "${labelText}" (aria-checked: ${ariaChecked})`
     );
 
     if (labelText.includes("squash and merge")) {
       items.squash = item;
-      console.log("[GitHub PR Merge Method] ✓ Found squash menu item");
+      debug.log("[GitHub PR Merge Method] ✓ Found squash menu item");
     } else if (labelText.includes("rebase and merge")) {
       items.rebase = item;
-      console.log("[GitHub PR Merge Method] ✓ Found rebase menu item");
+      debug.log("[GitHub PR Merge Method] ✓ Found rebase menu item");
     } else if (
       labelText.includes("merge commit") ||
       labelText.includes("create a merge")
     ) {
       items.merge = item;
-      console.log("[GitHub PR Merge Method] ✓ Found merge menu item");
+      debug.log("[GitHub PR Merge Method] ✓ Found merge menu item");
     }
   });
 
@@ -337,22 +335,19 @@ function getMergeMethodButtons() {
 function debugMergeBox() {
   const mergeBox = document.querySelector(".merge-box");
   if (!mergeBox) {
-    console.log("[GitHub PR Merge Method] No merge box found on page");
+    debug.log("[GitHub PR Merge Method] No merge box found on page");
     return;
   }
 
-  console.log("[GitHub PR Merge Method] Merge box found:", mergeBox);
-  console.log("[GitHub PR Merge Method] Merge box HTML (first 500 chars):");
-  console.log(mergeBox.innerHTML.substring(0, 500));
+  debug.log("[GitHub PR Merge Method] Merge box found:", mergeBox);
+  debug.log("[GitHub PR Merge Method] Merge box HTML (first 500 chars):");
+  debug.log(mergeBox.innerHTML.substring(0, 500));
 
   // Find all input elements
   const inputs = mergeBox.querySelectorAll("input");
-  console.log(
-    "[GitHub PR Merge Method] All inputs in merge box:",
-    inputs.length
-  );
+  debug.log("[GitHub PR Merge Method] All inputs in merge box:", inputs.length);
   inputs.forEach((input, idx) => {
-    console.log(`[GitHub PR Merge Method] Input ${idx}:`, {
+    debug.log(`[GitHub PR Merge Method] Input ${idx}:`, {
       type: input.type,
       name: input.name,
       value: input.value,
@@ -364,12 +359,12 @@ function debugMergeBox() {
 
   // Find all buttons
   const buttons = mergeBox.querySelectorAll("button");
-  console.log(
+  debug.log(
     "[GitHub PR Merge Method] All buttons in merge box:",
     buttons.length
   );
   buttons.forEach((button, idx) => {
-    console.log(`[GitHub PR Merge Method] Button ${idx}:`, {
+    debug.log(`[GitHub PR Merge Method] Button ${idx}:`, {
       textContent: button.textContent.trim().substring(0, 50),
       classList: Array.from(button.classList),
       disabled: button.disabled,
@@ -386,7 +381,7 @@ async function isMergeMethodAvailable(mergeMethod) {
   // Open the dropdown to see available options
   const opened = await openMergeMethodDropdown();
   if (!opened) {
-    console.log(
+    debug.log(
       `[GitHub PR Merge Method] Cannot check availability - dropdown won't open`
     );
     return false;
@@ -404,7 +399,7 @@ async function isMergeMethodAvailable(mergeMethod) {
   }
 
   if (!menuItem) {
-    console.log(
+    debug.log(
       `[GitHub PR Merge Method] Menu item for "${mergeMethod}" not found`
     );
     return false;
@@ -416,13 +411,13 @@ async function isMergeMethodAvailable(mergeMethod) {
     menuItem.getAttribute("aria-disabled") === "true";
 
   if (isDisabled) {
-    console.log(
+    debug.log(
       `[GitHub PR Merge Method] Menu item for "${mergeMethod}" is disabled`
     );
     return false;
   }
 
-  console.log(
+  debug.log(
     `[GitHub PR Merge Method] Menu item for "${mergeMethod}" is available`
   );
   return true;
@@ -435,11 +430,11 @@ async function isMergeMethodAvailable(mergeMethod) {
  */
 async function selectMergeMethod(mergeMethod) {
   if (!mergeMethod) {
-    console.error("[GitHub PR Merge Method] No merge method specified");
+    debug.warn("[GitHub PR Merge Method] No merge method specified");
     return false;
   }
 
-  console.log(
+  debug.log(
     `[GitHub PR Merge Method] Attempting to select merge method: ${mergeMethod}`
   );
 
@@ -447,7 +442,7 @@ async function selectMergeMethod(mergeMethod) {
   const mainButton = getMainMergeButton();
   if (mainButton) {
     const currentMethod = mainButton.textContent.toLowerCase();
-    console.log(
+    debug.log(
       `[GitHub PR Merge Method] Current button text: "${currentMethod}"`
     );
 
@@ -456,7 +451,7 @@ async function selectMergeMethod(mergeMethod) {
       (mergeMethod === "rebase" && currentMethod.includes("rebase")) ||
       (mergeMethod === "merge" && currentMethod.includes("merge commit"))
     ) {
-      console.log(
+      debug.log(
         `[GitHub PR Merge Method] Merge method "${mergeMethod}" is already selected`
       );
       return true;
@@ -466,7 +461,7 @@ async function selectMergeMethod(mergeMethod) {
   // Open dropdown
   const opened = await openMergeMethodDropdown();
   if (!opened) {
-    console.error("[GitHub PR Merge Method] Failed to open dropdown");
+    debug.warn("[GitHub PR Merge Method] Failed to open dropdown");
     return false;
   }
 
@@ -475,7 +470,7 @@ async function selectMergeMethod(mergeMethod) {
   const menuItem = menuItems[mergeMethod];
 
   if (!menuItem) {
-    console.error(
+    debug.warn(
       `[GitHub PR Merge Method] Menu item for "${mergeMethod}" not found`
     );
     // Close dropdown
@@ -492,7 +487,7 @@ async function selectMergeMethod(mergeMethod) {
     menuItem.getAttribute("aria-disabled") === "true";
 
   if (isDisabled) {
-    console.warn(
+    debug.warn(
       `[GitHub PR Merge Method] Merge method "${mergeMethod}" is not available or disabled for this PR`
     );
     // Close dropdown
@@ -504,35 +499,33 @@ async function selectMergeMethod(mergeMethod) {
   }
 
   // Click the menu item (the <li role="menuitemradio"> element)
-  console.log(
-    `[GitHub PR Merge Method] Clicking menu item for "${mergeMethod}"`
-  );
-  console.log(`[GitHub PR Merge Method] Menu item element:`, menuItem);
-  console.log(`[GitHub PR Merge Method] Menu item tag:`, menuItem.tagName);
-  console.log(
+  debug.log(`[GitHub PR Merge Method] Clicking menu item for "${mergeMethod}"`);
+  debug.log(`[GitHub PR Merge Method] Menu item element:`, menuItem);
+  debug.log(`[GitHub PR Merge Method] Menu item tag:`, menuItem.tagName);
+  debug.log(
     `[GitHub PR Merge Method] Menu item role:`,
     menuItem.getAttribute("role")
   );
-  console.log(
+  debug.log(
     `[GitHub PR Merge Method] Current aria-checked:`,
     menuItem.getAttribute("aria-checked")
   );
 
   // Click the <li> element directly - it's the interactive radio button
-  console.log(`[GitHub PR Merge Method] Clicking <li> element...`);
+  debug.log(`[GitHub PR Merge Method] Clicking <li> element...`);
   menuItem.click();
 
   // Wait for the UI to update
   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  console.log(`[GitHub PR Merge Method] Selected merge method: ${mergeMethod}`);
+  debug.log(`[GitHub PR Merge Method] Selected merge method: ${mergeMethod}`);
 
   // Verify the selection by checking the main button text
   await new Promise((resolve) => setTimeout(resolve, 100));
   const verifyButton = getMainMergeButton();
   if (verifyButton) {
     const newText = verifyButton.textContent.toLowerCase();
-    console.log(`[GitHub PR Merge Method] New button text: "${newText}"`);
+    debug.log(`[GitHub PR Merge Method] New button text: "${newText}"`);
 
     const isCorrect =
       (mergeMethod === "squash" && newText.includes("squash")) ||
@@ -540,11 +533,11 @@ async function selectMergeMethod(mergeMethod) {
       (mergeMethod === "merge" && newText.includes("merge commit"));
 
     if (isCorrect) {
-      console.log(
+      debug.log(
         `[GitHub PR Merge Method] ✓ Merge method successfully changed!`
       );
     } else {
-      console.warn(
+      debug.warn(
         `[GitHub PR Merge Method] ⚠ Button text didn't change as expected`
       );
     }
@@ -559,13 +552,13 @@ async function selectMergeMethod(mergeMethod) {
  */
 async function loadRulesFromStorage() {
   try {
-    console.log("[GitHub PR Merge Method] Requesting rules from background...");
+    debug.log("[GitHub PR Merge Method] Requesting rules from background...");
 
     // Send message to background script to get rules
     return new Promise((resolve) => {
       browserAPI.runtime.sendMessage({ action: "getRules" }, (response) => {
         if (browserAPI.runtime.lastError) {
-          console.error(
+          debug.warn(
             "[GitHub PR Merge Method] Error communicating with background:",
             browserAPI.runtime.lastError
           );
@@ -574,13 +567,13 @@ async function loadRulesFromStorage() {
         }
 
         if (response && response.success) {
-          console.log(
+          debug.log(
             "[GitHub PR Merge Method] Received rules from background:",
             response.rules
           );
           resolve(response.rules || []);
         } else {
-          console.error(
+          debug.warn(
             "[GitHub PR Merge Method] Failed to get rules:",
             response?.error
           );
@@ -589,7 +582,7 @@ async function loadRulesFromStorage() {
       });
     });
   } catch (error) {
-    console.error("[GitHub PR Merge Method] Error loading rules:", error);
+    debug.warn("[GitHub PR Merge Method] Error loading rules:", error);
     return [];
   }
 }
@@ -600,11 +593,11 @@ async function loadRulesFromStorage() {
  */
 async function applyMergeMethod() {
   try {
-    console.log("[GitHub PR Merge Method] Starting applyMergeMethod...");
+    debug.log("[GitHub PR Merge Method] Starting applyMergeMethod...");
 
     // Check if we're on a PR page
     if (!isMainPRPage()) {
-      console.log(
+      debug.log(
         "[GitHub PR Merge Method] Not on a main PR page, skipping merge method application"
       );
       return false;
@@ -612,9 +605,9 @@ async function applyMergeMethod() {
 
     // Extract repository and PR number
     const repository = extractRepoFromPath();
-    console.log("[GitHub PR Merge Method] Extracted repository:", repository);
+    debug.log("[GitHub PR Merge Method] Extracted repository:", repository);
     if (!repository) {
-      console.error(
+      debug.warn(
         "[GitHub PR Merge Method] Could not extract repository from URL"
       );
       return false;
@@ -622,15 +615,15 @@ async function applyMergeMethod() {
 
     // Get target branch from page
     const branch = getBranchFromPRPage();
-    console.log("[GitHub PR Merge Method] Extracted branch:", branch);
+    debug.log("[GitHub PR Merge Method] Extracted branch:", branch);
     if (!branch) {
-      console.error(
+      debug.warn(
         "[GitHub PR Merge Method] Could not extract target branch from page"
       );
       return false;
     }
 
-    console.log(
+    debug.log(
       `[GitHub PR Merge Method] Processing PR for ${repository} targeting ${branch}`
     );
 
@@ -639,30 +632,30 @@ async function applyMergeMethod() {
 
     // Load rules
     const rules = await loadRulesFromStorage();
-    console.log("[GitHub PR Merge Method] Loaded rules:", rules);
+    debug.log("[GitHub PR Merge Method] Loaded rules:", rules);
     if (!rules || rules.length === 0) {
-      console.log("[GitHub PR Merge Method] No rules configured");
+      debug.log("[GitHub PR Merge Method] No rules configured");
       return false;
     }
 
     // Find matching rule
     const matchingRule = findMatchingRule(repository, branch, rules);
-    console.log("[GitHub PR Merge Method] Matching rule:", matchingRule);
+    debug.log("[GitHub PR Merge Method] Matching rule:", matchingRule);
     if (!matchingRule) {
-      console.log(
+      debug.log(
         `[GitHub PR Merge Method] No matching rule found for ${repository}:${branch}`
       );
       return false;
     }
 
-    console.log(
+    debug.log(
       `[GitHub PR Merge Method] Found matching rule: ${matchingRule.mergeMethod} for ${repository}:${branch}`
     );
 
     // Apply the merge method
     const success = selectMergeMethod(matchingRule.mergeMethod);
     if (success) {
-      console.log(
+      debug.log(
         `[GitHub PR Merge Method] Successfully applied merge method: ${matchingRule.mergeMethod}`
       );
       return true;
@@ -670,10 +663,7 @@ async function applyMergeMethod() {
 
     return false;
   } catch (error) {
-    console.error(
-      "[GitHub PR Merge Method] Error applying merge method:",
-      error
-    );
+    debug.warn("[GitHub PR Merge Method] Error applying merge method:", error);
     return false;
   }
 }
@@ -716,19 +706,19 @@ function waitForElement(selector, timeout = 5000) {
  * Main entry point - runs when the content script loads
  */
 async function main() {
-  console.log("[GitHub PR Merge Method] Content script loaded");
-  console.log("[GitHub PR Merge Method] Current URL:", location.href);
-  console.log("[GitHub PR Merge Method] Pathname:", location.pathname);
+  debug.log("[GitHub PR Merge Method] Content script loaded");
+  debug.log("[GitHub PR Merge Method] Current URL:", location.href);
+  debug.log("[GitHub PR Merge Method] Pathname:", location.pathname);
 
   // Check if we're on a PR page
   if (!isMainPRPage()) {
-    console.log(
+    debug.log(
       "[GitHub PR Merge Method] Not on a PR page, extension will not run"
     );
     return;
   }
 
-  console.log("[GitHub PR Merge Method] On PR page, starting extension...");
+  debug.log("[GitHub PR Merge Method] On PR page, starting extension...");
 
   // Wait for the merge box to be present
   await waitForElement(".merge-box", 10000);
@@ -749,7 +739,7 @@ async function main() {
     );
 
     if (mergeBoxChanged) {
-      console.log("Merge box changed, reapplying merge method...");
+      debug.log("Merge box changed, reapplying merge method...");
       await applyMergeMethod();
     }
   });

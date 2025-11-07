@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `Successfully imported ${importedData.rules.length} rule(s)!`
       );
     } catch (error) {
-      console.error("Error importing rules:", error);
+      debug.warn("Error importing rules:", error);
       showErrorMessage(
         "An error occurred while importing rules. Please try again."
       );

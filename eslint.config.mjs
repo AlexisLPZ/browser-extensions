@@ -20,6 +20,7 @@ export default [
       globals: {
         ...globals.browser,
         chrome: "readonly",
+        debug: "readonly",
       },
     },
   },
@@ -32,6 +33,7 @@ export default [
         ...globals.browser,
         ...globals.node, // Add Node.js globals like 'module'
         chrome: "readonly", // for extensions
+        debug: "readonly",
       },
     },
     rules: {
@@ -77,6 +79,7 @@ export default [
         ...globals.browser,
         ...globals.jest, // Jest globals like describe, test, expect
         chrome: "readonly",
+        debug: "readonly",
       },
     },
     rules: {
