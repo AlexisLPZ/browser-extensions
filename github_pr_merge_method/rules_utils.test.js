@@ -371,14 +371,14 @@ describe("canAddRule", () => {
   });
 
   describe("console.error behavior", () => {
-    let consoleSpy;
+    let debugWarnSpy;
 
     beforeEach(() => {
-      consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      debugWarnSpy = jest.spyOn(debug, "warn").mockImplementation(() => {});
     });
 
     afterEach(() => {
-      consoleSpy.mockRestore();
+      debugWarnSpy.mockRestore();
     });
 
     it("should log error when JSON parsing fails", async () => {
@@ -388,7 +388,7 @@ describe("canAddRule", () => {
         await canAddRule("owner/repo", "main");
       }).rejects.toThrow();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(debugWarnSpy).toHaveBeenCalledWith(
         "Error checking for rule conflicts:",
         expect.any(Error)
       );

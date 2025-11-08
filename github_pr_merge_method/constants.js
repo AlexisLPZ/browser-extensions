@@ -18,7 +18,7 @@ if (typeof window !== "undefined") {
 
     // Safety check: Only execute once (prevents re-initialization if script loads twice)
     if (window.MERGE_METHODS) {
-      console.log("[constants.js] Already loaded, skipping");
+      debug.log("[constants.js] Already loaded, skipping");
       return;
     }
 
