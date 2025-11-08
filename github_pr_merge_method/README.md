@@ -140,7 +140,8 @@ This extension:
 
 ```
 github_pr_merge_method/
-├── manifest.json          # Extension configuration
+├── manifest.json          # Extension configuration (Chrome)
+├── manifest.firefox.json  # Extension configuration (Firefox)
 ├── background.js          # Background service worker
 ├── content.js             # Content script for GitHub pages
 ├── popup.html             # Popup UI
@@ -150,8 +151,11 @@ github_pr_merge_method/
 ├── storage.js             # Storage abstraction
 ├── templates.js           # UI templates
 ├── constants.js           # Shared constants
+├── build.sh               # Build script for both browsers
 └── *.test.js              # Test files
 ```
+
+See [BROWSER_DIFFERENCES.md](BROWSER_DIFFERENCES.md) for details on Chrome vs Firefox configuration.
 
 ### Running Tests
 
@@ -161,36 +165,78 @@ npm test
 
 ### Building for Production
 
-1. Create a production zip file with version number
+The extension uses separate manifests for Chrome and Firefox to handle browser-specific requirements.
+
+#### Build Script
+
+Run the automated build script to create packages for both browsers:
 
 ```bash
 cd github_pr_merge_method
-zip -r ../github-pr-merge-method-v1.0.0.zip . \
+./build.sh
+```
+
+This creates:
+
+- `dist/github-pr-merge-method-v1.x.y-chrome.zip` - Ready for Chrome Web Store
+- `dist/github-pr-merge-method-v1.x.y-firefox.zip` - Ready for Firefox Add-ons
+
+#### Manual Build (if needed)
+
+**Chrome:**
+
+```bash
+cd github_pr_merge_method
+zip -r ../github-pr-merge-method-v1.x.y-chrome.zip . \
   -x "*.test.js" \
   -x "*.md" \
+  -x "manifest.firefox.json" \
+  -x "build.sh" \
   -x "node_modules/*" \
   -x ".git/*" \
   -x "*.log"
 ```
 
-2. Update version in `manifest.json`
+**Firefox:**
 
+```bash
+cd github_pr_merge_method
+# Temporarily rename manifests
+mv manifest.json manifest.chrome.json
+mv manifest.firefox.json manifest.json
+zip -r ../github-pr-merge-method-v1.x.y-firefox.zip . \
+  -x "*.test.js" \
+  -x "*.md" \
+  -x "manifest.chrome.json" \
+  -x "build.sh" \
+  -x "node_modules/*" \
+  -x ".git/*" \
+  -x "*.log"
+# Restore manifests
+mv manifest.json manifest.firefox.json
+mv manifest.chrome.json manifest.json
+```
+
+#### Version Updates
+
+1. Update version in both `manifest.json` and `manifest.firefox.json`
+2. Run the build script
 3. Create a git tag:
 
 ```bash
-git tag -a pkg/github-pr-merge-method/v1.0.0 -m "Release v1.0.0"
-git push origin pkg/github-pr-merge-method/v1.0.0
+git tag -a pkg/github-pr-merge-method/v1.x.y -m "Release v1.x.y"
+git push origin pkg/github-pr-merge-method/v1.x.y
 ```
 
-3.  Create GitHub Release
+4. Create GitHub Release
 
-- Tag: `pkg/github-pr-merge-method/v1.0.0`
-- Title: `GitHub PR Merge Method v1.0.0 - Initial Release`
-- Attach: `github-pr-merge-method-v1.0.0.zip` (Chrome Web Store version)
+- Tag: `pkg/github-pr-merge-method/v1.x.y`
+- Title: `GitHub PR Merge Method v1.x.y - Initial Release`
+- Attach both zip files:
+  - `github-pr-merge-method-v1.x.y-chrome.zip` (Chrome Web Store)
+  - `github-pr-merge-method-v1.x.y-firefox.zip` (Firefox Add-ons)
 
-**Note:** GitHub auto-generates "Source code" downloads with the entire
-repository including shared development files. The attached zip contains
-only extension files ready for extension Web Store.
+**Note:** The build script automatically reads the version from `manifest.json` and only includes production files.
 
 ## Troubleshooting
 
@@ -204,7 +250,7 @@ only extension files ready for extension Web Store.
 
 - Ensure the JSON file follows the correct schema
 - Check that the file is valid JSON
-- Verify the version matches (currently `1.0.0`)
+- Verify the version matches (currently `1.0.1`)
 
 **Extension not loading?**
 
