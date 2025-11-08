@@ -196,9 +196,15 @@ zip -r github-pr-merge-method.zip . \
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
 
+### TODO list
+
+- [ ] Update rules list display with edit functionality
+- [ ] Style options page with modern CSS
+- [ ] Add rule limit (e.g., max 50 rules) with clear messaging
+
 ## License
 
-[Specify your license here - e.g., MIT, Apache 2.0, etc.]
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 
 ## Support
 

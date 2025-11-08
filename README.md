@@ -72,5 +72,5 @@ browser-extensions/
 └── github_pr_merge_method/
     ├── content.js         # Main extension logic
     ├── content.test.js    # Unit tests
-    └── popup.js           # Extension popup
+    └── ...                # etc.
 ```
