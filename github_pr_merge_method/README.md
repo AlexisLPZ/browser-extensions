@@ -161,8 +161,10 @@ npm test
 
 ### Building for Production
 
+1. Create a production zip file with version number
+
 ```bash
-# Create a production zip file
+cd github_pr_merge_method
 zip -r ../github-pr-merge-method-v1.0.0.zip . \
   -x "*.test.js" \
   -x "*.md" \
@@ -170,6 +172,25 @@ zip -r ../github-pr-merge-method-v1.0.0.zip . \
   -x ".git/*" \
   -x "*.log"
 ```
+
+2. Update version in `manifest.json`
+
+3. Create a git tag:
+
+```bash
+git tag -a pkg/github-pr-merge-method/v1.0.0 -m "Release v1.0.0"
+git push origin pkg/github-pr-merge-method/v1.0.0
+```
+
+3.  Create GitHub Release
+
+- Tag: `pkg/github-pr-merge-method/v1.0.0`
+- Title: `GitHub PR Merge Method v1.0.0 - Initial Release`
+- Attach: `github-pr-merge-method-v1.0.0.zip` (Chrome Web Store version)
+
+**Note:** GitHub auto-generates "Source code" downloads with the entire
+repository including shared development files. The attached zip contains
+only extension files ready for extension Web Store.
 
 ## Troubleshooting
 
