@@ -163,7 +163,7 @@ npm test
 
 ```bash
 # Create a production zip file
-zip -r github-pr-merge-method-v1.0.0.zip . \
+zip -r ../github-pr-merge-method-v1.0.0.zip . \
   -x "*.test.js" \
   -x "*.md" \
   -x "node_modules/*" \
