@@ -42,10 +42,10 @@
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.5.0",
-    "htmlhint": "^1.7.1",
+    "htmlhint": "^1.8.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
-    "jsdom": "^27.1.0",
-    "prettier": "^3.6.2"
+    "jsdom": "^27.3.0",
+    "prettier": "^3.7.4"
   }
 }
